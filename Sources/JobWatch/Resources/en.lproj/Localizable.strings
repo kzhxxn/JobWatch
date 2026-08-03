@@ -1,0 +1,93 @@
+"app.name" = "JobWatch";
+"menu.title" = "JobWatch";
+
+"header.disk" = "Disk";
+"header.jobsSummary" = "%d jobs · %d healthy · %d issues";
+"header.refresh" = "Refresh";
+"header.lastRefresh" = "Updated %@";
+
+"section.user" = "User Agents";
+"section.global" = "System Agents (read-only)";
+
+"status.running" = "running (PID %d)";
+"status.loaded" = "loaded";
+"status.unloaded" = "not loaded";
+"status.exit" = "last exit %d";
+
+"action.run" = "Run now";
+"action.load" = "Load";
+"action.unload" = "Unload";
+"action.log" = "Open log";
+"action.plist" = "Reveal .plist";
+"action.quit" = "Quit JobWatch";
+
+"empty" = "No launchd jobs found";
+
+"sched.everyHours" = "every %d h";
+"sched.everyMinutes" = "every %d min";
+"sched.everySeconds" = "every %d s";
+"sched.watchPaths" = "on path change";
+"sched.watchDirs" = "on directory change";
+"sched.atLogin" = "at login";
+"sched.keepAlive" = "always on";
+"sched.manual" = "manual";
+"sched.schedule" = "scheduled";
+"sched.weeklyPrefix" = "every %@";
+"sched.monthlyPrefix" = "day %d monthly";
+
+"weekday.0" = "Sunday";
+"weekday.1" = "Monday";
+"weekday.2" = "Tuesday";
+"weekday.3" = "Wednesday";
+"weekday.4" = "Thursday";
+"weekday.5" = "Friday";
+"weekday.6" = "Saturday";
+
+"msg.ran" = "▶︎ %@ started";
+"msg.loadedOk" = "%@ loaded";
+"msg.unloadedOk" = "%@ unloaded";
+"msg.failed" = "Failed (code %d): %@";
+"msg.noLog" = "This job has no log path configured";
+
+"job.lastRun" = "last run %@";
+"job.estimated" = "est.";
+"job.nextRun" = "next %@";
+"job.neverRun" = "no run logged";
+
+"action.edit" = "Rename / note";
+"edit.name" = "Display name";
+"edit.note" = "Note";
+"edit.tags" = "Tags (comma separated)";
+"edit.save" = "Save";
+"edit.cancel" = "Cancel";
+
+"job.running" = "running";
+
+"desc.script" = "Runs %2$@ (%1$@)";
+"desc.generic" = "%@ task";
+
+"desc.compose" = "%2$@ %1$@";
+"desc.objectOnly" = "Manage %@";
+"verb.clean" = "Clean up";
+"verb.backup" = "Back up";
+"verb.sync" = "Sync";
+"verb.deploy" = "Deploy";
+"verb.build" = "Build";
+"verb.update" = "Update";
+"verb.fetch" = "Fetch";
+"verb.upload" = "Upload";
+"verb.notify" = "Notify";
+"verb.monitor" = "Monitor";
+"verb.archive" = "Archive";
+"verb.restart" = "Restart";
+"verb.test" = "Test";
+"verb.index" = "Index";
+"noun.cache" = "cache";
+"noun.log" = "logs";
+"noun.db" = "database";
+"noun.image" = "images";
+"noun.dep" = "dependencies";
+"noun.cert" = "certificates";
+"noun.file" = "files";
+"noun.data" = "data";
+"noun.report" = "report";

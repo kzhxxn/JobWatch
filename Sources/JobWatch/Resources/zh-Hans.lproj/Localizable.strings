@@ -1,0 +1,93 @@
+"app.name" = "JobWatch";
+"menu.title" = "JobWatch";
+
+"header.disk" = "磁盘";
+"header.jobsSummary" = "任务 %d · 正常 %d · 问题 %d";
+"header.refresh" = "刷新";
+"header.lastRefresh" = "更新于 %@";
+
+"section.user" = "用户代理";
+"section.global" = "系统代理（只读）";
+
+"status.running" = "运行中 (PID %d)";
+"status.loaded" = "已加载";
+"status.unloaded" = "未加载";
+"status.exit" = "上次退出 %d";
+
+"action.run" = "立即运行";
+"action.load" = "加载";
+"action.unload" = "卸载";
+"action.log" = "打开日志";
+"action.plist" = "显示 .plist";
+"action.quit" = "退出 JobWatch";
+
+"empty" = "未找到 launchd 任务";
+
+"sched.everyHours" = "每 %d 小时";
+"sched.everyMinutes" = "每 %d 分钟";
+"sched.everySeconds" = "每 %d 秒";
+"sched.watchPaths" = "路径变更时";
+"sched.watchDirs" = "目录变更时";
+"sched.atLogin" = "登录时运行一次";
+"sched.keepAlive" = "始终运行";
+"sched.manual" = "手动运行";
+"sched.schedule" = "已计划";
+"sched.weeklyPrefix" = "每 %@";
+"sched.monthlyPrefix" = "每月 %d 日";
+
+"weekday.0" = "星期日";
+"weekday.1" = "星期一";
+"weekday.2" = "星期二";
+"weekday.3" = "星期三";
+"weekday.4" = "星期四";
+"weekday.5" = "星期五";
+"weekday.6" = "星期六";
+
+"msg.ran" = "▶︎ 已启动 %@";
+"msg.loadedOk" = "已加载 %@";
+"msg.unloadedOk" = "已卸载 %@";
+"msg.failed" = "失败（代码 %d）：%@";
+"msg.noLog" = "此任务未配置日志路径";
+
+"job.lastRun" = "上次运行 %@";
+"job.estimated" = "估计";
+"job.nextRun" = "下次 %@";
+"job.neverRun" = "无运行记录";
+
+"action.edit" = "重命名 / 备注";
+"edit.name" = "显示名称";
+"edit.note" = "备注";
+"edit.tags" = "标签（逗号分隔）";
+"edit.save" = "保存";
+"edit.cancel" = "取消";
+
+"job.running" = "运行中";
+
+"desc.script" = "运行 %2$@（%1$@）";
+"desc.generic" = "%@ 任务";
+
+"desc.compose" = "%2$@%1$@";
+"desc.objectOnly" = "管理 %@";
+"verb.clean" = "清理";
+"verb.backup" = "备份";
+"verb.sync" = "同步";
+"verb.deploy" = "部署";
+"verb.build" = "构建";
+"verb.update" = "更新";
+"verb.fetch" = "抓取";
+"verb.upload" = "上传";
+"verb.notify" = "通知";
+"verb.monitor" = "监控";
+"verb.archive" = "归档";
+"verb.restart" = "重启";
+"verb.test" = "测试";
+"verb.index" = "索引";
+"noun.cache" = "缓存";
+"noun.log" = "日志";
+"noun.db" = "数据库";
+"noun.image" = "图片";
+"noun.dep" = "依赖";
+"noun.cert" = "证书";
+"noun.file" = "文件";
+"noun.data" = "数据";
+"noun.report" = "报告";

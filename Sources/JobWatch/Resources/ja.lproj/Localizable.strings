@@ -1,0 +1,93 @@
+"app.name" = "JobWatch";
+"menu.title" = "JobWatch";
+
+"header.disk" = "ディスク";
+"header.jobsSummary" = "ジョブ %d · 正常 %d · 問題 %d";
+"header.refresh" = "更新";
+"header.lastRefresh" = "更新 %@";
+
+"section.user" = "ユーザーエージェント";
+"section.global" = "システムエージェント (読み取り専用)";
+
+"status.running" = "実行中 (PID %d)";
+"status.loaded" = "ロード済み";
+"status.unloaded" = "未ロード";
+"status.exit" = "前回終了 %d";
+
+"action.run" = "今すぐ実行";
+"action.load" = "ロード";
+"action.unload" = "アンロード";
+"action.log" = "ログを開く";
+"action.plist" = ".plist を表示";
+"action.quit" = "JobWatch を終了";
+
+"empty" = "launchd ジョブが見つかりません";
+
+"sched.everyHours" = "%d時間ごと";
+"sched.everyMinutes" = "%d分ごと";
+"sched.everySeconds" = "%d秒ごと";
+"sched.watchPaths" = "パス変更時";
+"sched.watchDirs" = "ディレクトリ変更時";
+"sched.atLogin" = "ログイン時に1回";
+"sched.keepAlive" = "常時稼働";
+"sched.manual" = "手動実行";
+"sched.schedule" = "予約済み";
+"sched.weeklyPrefix" = "毎週%@";
+"sched.monthlyPrefix" = "毎月%d日";
+
+"weekday.0" = "日曜日";
+"weekday.1" = "月曜日";
+"weekday.2" = "火曜日";
+"weekday.3" = "水曜日";
+"weekday.4" = "木曜日";
+"weekday.5" = "金曜日";
+"weekday.6" = "土曜日";
+
+"msg.ran" = "▶︎ %@ を実行しました";
+"msg.loadedOk" = "%@ をロードしました";
+"msg.unloadedOk" = "%@ をアンロードしました";
+"msg.failed" = "失敗 (コード %d): %@";
+"msg.noLog" = "このジョブにはログパスが設定されていません";
+
+"job.lastRun" = "前回実行 %@";
+"job.estimated" = "推定";
+"job.nextRun" = "次回 %@";
+"job.neverRun" = "実行記録なし";
+
+"action.edit" = "名前・説明を編集";
+"edit.name" = "表示名";
+"edit.note" = "説明";
+"edit.tags" = "タグ (カンマ区切り)";
+"edit.save" = "保存";
+"edit.cancel" = "キャンセル";
+
+"job.running" = "実行中";
+
+"desc.script" = "%2$@ を実行 (%1$@)";
+"desc.generic" = "%@ タスク";
+
+"desc.compose" = "%1$@%2$@";
+"desc.objectOnly" = "%@ の管理";
+"verb.clean" = "整理";
+"verb.backup" = "バックアップ";
+"verb.sync" = "同期";
+"verb.deploy" = "デプロイ";
+"verb.build" = "ビルド";
+"verb.update" = "更新";
+"verb.fetch" = "取得";
+"verb.upload" = "アップロード";
+"verb.notify" = "通知";
+"verb.monitor" = "監視";
+"verb.archive" = "アーカイブ";
+"verb.restart" = "再起動";
+"verb.test" = "テスト";
+"verb.index" = "インデックス";
+"noun.cache" = "キャッシュ";
+"noun.log" = "ログ";
+"noun.db" = "DB";
+"noun.image" = "画像";
+"noun.dep" = "依存関係";
+"noun.cert" = "証明書";
+"noun.file" = "ファイル";
+"noun.data" = "データ";
+"noun.report" = "レポート";

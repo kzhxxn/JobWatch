@@ -1,0 +1,93 @@
+"app.name" = "JobWatch";
+"menu.title" = "JobWatch";
+
+"header.disk" = "디스크";
+"header.jobsSummary" = "잡 %d개 · 정상 %d · 문제 %d";
+"header.refresh" = "새로고침";
+"header.lastRefresh" = "갱신 %@";
+
+"section.user" = "사용자 에이전트";
+"section.global" = "시스템 에이전트 (읽기 전용)";
+
+"status.running" = "실행 중 (PID %d)";
+"status.loaded" = "로드됨";
+"status.unloaded" = "로드 안 됨";
+"status.exit" = "마지막 종료 %d";
+
+"action.run" = "지금 실행";
+"action.load" = "올리기";
+"action.unload" = "내리기";
+"action.log" = "로그 열기";
+"action.plist" = ".plist 보기";
+"action.quit" = "JobWatch 종료";
+
+"empty" = "launchd 잡을 찾지 못함";
+
+"sched.everyHours" = "%d시간마다";
+"sched.everyMinutes" = "%d분마다";
+"sched.everySeconds" = "%d초마다";
+"sched.watchPaths" = "경로 변경 시";
+"sched.watchDirs" = "디렉토리 변경 시";
+"sched.atLogin" = "로그인 시 1회";
+"sched.keepAlive" = "상시 유지";
+"sched.manual" = "수동 실행";
+"sched.schedule" = "예약됨";
+"sched.weeklyPrefix" = "매주 %@";
+"sched.monthlyPrefix" = "매월 %d일";
+
+"weekday.0" = "일요일";
+"weekday.1" = "월요일";
+"weekday.2" = "화요일";
+"weekday.3" = "수요일";
+"weekday.4" = "목요일";
+"weekday.5" = "금요일";
+"weekday.6" = "토요일";
+
+"msg.ran" = "▶︎ %@ 실행됨";
+"msg.loadedOk" = "%@ 올림 완료";
+"msg.unloadedOk" = "%@ 내림 완료";
+"msg.failed" = "실패 (코드 %d): %@";
+"msg.noLog" = "이 잡엔 로그 경로가 지정돼 있지 않음";
+
+"job.lastRun" = "마지막 실행 %@";
+"job.estimated" = "추정";
+"job.nextRun" = "다음 %@";
+"job.neverRun" = "실행 기록 없음";
+
+"action.edit" = "이름·설명 편집";
+"edit.name" = "표시 이름";
+"edit.note" = "설명";
+"edit.tags" = "태그 (쉼표로 구분)";
+"edit.save" = "저장";
+"edit.cancel" = "취소";
+
+"job.running" = "실행 중";
+
+"desc.script" = "%2$@ 실행 (%1$@)";
+"desc.generic" = "%@ 작업";
+
+"desc.compose" = "%1$@ %2$@";
+"desc.objectOnly" = "%@ 관리";
+"verb.clean" = "정리";
+"verb.backup" = "백업";
+"verb.sync" = "동기화";
+"verb.deploy" = "배포";
+"verb.build" = "빌드";
+"verb.update" = "업데이트";
+"verb.fetch" = "수집";
+"verb.upload" = "업로드";
+"verb.notify" = "알림";
+"verb.monitor" = "모니터링";
+"verb.archive" = "아카이브";
+"verb.restart" = "재시작";
+"verb.test" = "테스트";
+"verb.index" = "인덱싱";
+"noun.cache" = "캐시";
+"noun.log" = "로그";
+"noun.db" = "DB";
+"noun.image" = "이미지";
+"noun.dep" = "의존성";
+"noun.cert" = "인증서";
+"noun.file" = "파일";
+"noun.data" = "데이터";
+"noun.report" = "리포트";
