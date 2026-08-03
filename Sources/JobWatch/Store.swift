@@ -20,7 +20,27 @@ final class JobStore {
     // 발사대에서 클릭해 선택한 잡 (하단 상세 표시용)
     var selectedLabel: String?
 
+    // 최근 발사 감지 (label → 애니메이션 시작 시각). 짧은 잡도 놓치지 않게 이력/mtime 변화로 감지.
+    var launchAt: [String: Date] = [:]
+    private var lastSeenStart: [String: Date] = [:]
+    private var launchDetectionInited = false
+
     func job(for label: String) -> LaunchJob? { jobs.first { $0.label == label } }
+
+    private func detectLaunches() {
+        let now = Date()
+        var seen = lastSeenStart
+        for j in jobs {
+            guard let start = history[j.label]?.last?.startedAt ?? j.lastRunApprox else { continue }
+            if launchDetectionInited, let prev = lastSeenStart[j.label], start > prev {
+                launchAt[j.label] = now                     // 새 실행 감지 → 발사 애니메이션 시작
+            }
+            seen[j.label] = start
+        }
+        lastSeenStart = seen
+        launchDetectionInited = true
+        launchAt = launchAt.filter { now.timeIntervalSince($0.value) < 5 }   // 오래된 건 정리
+    }
 
     init() {
         annotations = AnnotationStore.load()
@@ -53,6 +73,7 @@ final class JobStore {
         self.jobs = scanned
         self.disk = disk
         self.history = hist
+        detectLaunches()
         self.lastRefresh = Date()
         self.isRefreshing = false
     }
