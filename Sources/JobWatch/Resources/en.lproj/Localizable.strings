@@ -91,3 +91,9 @@
 "noun.file" = "files";
 "noun.data" = "data";
 "noun.report" = "report";
+"job.recorded" = "recorded";
+"job.successRateHelp" = "%1$d%% success (%2$d runs)";
+
+"pad.next" = "Next";
+"pad.seeAll" = "See all";
+"pad.none" = "No scheduled launches";

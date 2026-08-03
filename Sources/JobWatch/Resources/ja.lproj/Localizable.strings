@@ -91,3 +91,9 @@
 "noun.file" = "ファイル";
 "noun.data" = "データ";
 "noun.report" = "レポート";
+"job.recorded" = "記録済み";
+"job.successRateHelp" = "成功率 %1$d%% (%2$d回)";
+
+"pad.next" = "次の発射";
+"pad.seeAll" = "すべて表示";
+"pad.none" = "予定された発射なし";

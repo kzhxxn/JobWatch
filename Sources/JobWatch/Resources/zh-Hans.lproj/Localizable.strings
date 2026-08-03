@@ -91,3 +91,9 @@
 "noun.file" = "文件";
 "noun.data" = "数据";
 "noun.report" = "报告";
+"job.recorded" = "已记录";
+"job.successRateHelp" = "成功率 %1$d%%（%2$d 次）";
+
+"pad.next" = "下次发射";
+"pad.seeAll" = "查看全部";
+"pad.none" = "无预定发射";

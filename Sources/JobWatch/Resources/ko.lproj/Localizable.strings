@@ -91,3 +91,9 @@
 "noun.file" = "파일";
 "noun.data" = "데이터";
 "noun.report" = "리포트";
+"job.recorded" = "기록됨";
+"job.successRateHelp" = "성공률 %1$d%% (%2$d회)";
+
+"pad.next" = "다음 발사";
+"pad.seeAll" = "전체 보기";
+"pad.none" = "예정된 발사 없음";

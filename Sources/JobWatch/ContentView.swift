@@ -8,8 +8,12 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            LaunchPadView(store: store)
             header
             Divider()
+            if let msg = store.lastMessage {
+                messageBanner(msg)
+            }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     if store.jobs.isEmpty {
@@ -30,13 +34,9 @@ struct ContentView: View {
             }
             .frame(maxHeight: 420)
 
-            if let msg = store.lastMessage {
+            if let label = store.selectedLabel, let job = store.job(for: label) {
                 Divider()
-                Text(msg)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .padding(.horizontal, 12).padding(.vertical, 6)
+                selectionDetail(job)
             }
             Divider()
             footer
@@ -48,6 +48,87 @@ struct ContentView: View {
                 await store.refresh()
                 try? await Task.sleep(for: .seconds(5))
             }
+        }
+    }
+
+    // 발사대에서 클릭한 잡의 상세 (하단 활성 패널)
+    private func selectionDetail(_ job: LaunchJob) -> some View {
+        let ann = store.annotation(for: job)
+        let title = ann.displayName.isEmpty ? Inference.displayName(for: job) : ann.displayName
+        let desc = ann.note.isEmpty ? Inference.description(for: job) : ann.note
+        let h = store.history[job.label]
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: Inference.category(for: job).icon).foregroundStyle(.tint)
+                Text(title).font(.callout).fontWeight(.semibold).lineLimit(1)
+                Spacer()
+                Button { store.selectedLabel = nil } label: {
+                    Image(systemName: "xmark").font(.system(size: 10))
+                }.buttonStyle(.borderless).foregroundStyle(.secondary)
+            }
+            Text(desc).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            Text(job.label).font(.caption2).foregroundStyle(.tertiary).textSelection(.enabled)
+            HStack(spacing: 10) {
+                Label(job.scheduleText, systemImage: "calendar")
+                if let n = job.nextRun { Label(fmtTime(n), systemImage: "arrow.right.circle") }
+            }.font(.caption2).foregroundStyle(.secondary)
+            if let h, h.count > 0 {
+                HStack(spacing: 3) {
+                    Text(t("job.recorded")).font(.caption2).foregroundStyle(.secondary)
+                    ForEach(Array(h.runs.prefix(12).reversed())) { run in
+                        Circle().fill(run.success ? Color.green : Color.red).frame(width: 6, height: 6)
+                    }
+                    if let last = h.last { Text("· \(fmtDur(last.duration))").font(.caption2).foregroundStyle(.secondary) }
+                }
+            }
+            HStack(spacing: 16) {
+                if job.isManageable {
+                    Button(t("action.run")) { Task { await store.runNow(job) } }
+                    Button(job.isLoaded ? t("action.unload") : t("action.load")) { Task { await store.toggleLoaded(job) } }
+                }
+                Button(t("action.log")) { store.openLog(job) }
+                Button(t("action.plist")) { store.revealPlist(job) }
+            }
+            .font(.caption).buttonStyle(.borderless)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.07))
+    }
+
+    private func fmtDur(_ d: Double?) -> String {
+        guard let d else { return "—" }
+        if d < 1 { return String(format: "%.0fms", d * 1000) }
+        if d < 60 { return String(format: "%.1fs", d) }
+        if d < 3600 { return String(format: "%.0fm", d / 60) }
+        return String(format: "%.1fh", d / 3600)
+    }
+    private func fmtTime(_ date: Date) -> String {
+        Calendar.current.isDateInToday(date)
+            ? date.formatted(date: .omitted, time: .shortened)
+            : date.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    // 눈에 띄는 메시지 배너 (4초 뒤 자동 사라짐)
+    private func messageBanner(_ msg: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "info.circle.fill")
+                .foregroundStyle(.tint)
+            Text(msg)
+                .font(.callout).fontWeight(.medium)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button { store.lastMessage = nil } label: {
+                Image(systemName: "xmark").font(.system(size: 10))
+            }
+            .buttonStyle(.borderless).foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.15))
+        .task(id: msg) {
+            try? await Task.sleep(for: .seconds(4))
+            if store.lastMessage == msg { store.lastMessage = nil }
         }
     }
 
@@ -162,10 +243,13 @@ struct JobRow: View {
         ann.note.isEmpty ? Inference.description(for: job) : ann.note
     }
 
-    // "언제" — 마지막 실행(색으로 성공/실패) + 다음 실행. 가독성 최우선 줄.
+    private var recorded: JobHistory? { store.history[job.label] }
+
+    // "언제" — 마지막 실행(색으로 성공/실패) + 최근 실행 점 + 다음 실행. 가독성 최우선 줄.
     private var whenLine: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             lastRunView
+            if let h = recorded, h.count > 1 { recentDots(h) }
             if let next = job.nextRun {
                 Label(t("job.nextRun", timeStr(next)), systemImage: "arrow.right.circle")
                     .foregroundStyle(.secondary)
@@ -180,7 +264,19 @@ struct JobRow: View {
         if job.pid != nil {
             Label(t("job.running"), systemImage: "play.circle.fill")
                 .foregroundStyle(.green)
+        } else if let last = recorded?.last {
+            // Recorded — 정밀 시각 + duration (추정 아님)
+            let ok = last.success
+            Label {
+                Text("\(rel(last.startedAt)) · \(fmtDuration(last.duration))")
+            } icon: {
+                Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
+            }
+            .foregroundStyle(ok ? .green : .red)
+            .help(ok ? t("job.recorded")
+                     : "\(t("status.exit", last.exitCode ?? -1)) · \(t("job.recorded"))")
         } else if let last = job.lastRunApprox {
+            // Estimated — 로그 mtime 근사
             let ok = (job.lastExitCode ?? 0) == 0
             Label {
                 Text(t("job.lastRun", "~" + rel(last)))
@@ -193,6 +289,26 @@ struct JobRow: View {
             Label(t("job.neverRun"), systemImage: "questionmark.circle")
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    // 최근 실행 결과 점 (오래된 것 왼쪽 → 최신 오른쪽)
+    private func recentDots(_ h: JobHistory) -> some View {
+        HStack(spacing: 2) {
+            ForEach(Array(h.runs.prefix(8).reversed())) { run in
+                Circle()
+                    .fill(run.success ? Color.green : Color.red)
+                    .frame(width: 5, height: 5)
+            }
+        }
+        .help(t("job.successRateHelp", Int((h.successRate * 100).rounded()), h.count))
+    }
+
+    private func fmtDuration(_ d: Double?) -> String {
+        guard let d else { return "—" }
+        if d < 1 { return String(format: "%.0fms", d * 1000) }
+        if d < 60 { return String(format: "%.1fs", d) }
+        if d < 3600 { return String(format: "%.0fm", d / 60) }
+        return String(format: "%.1fh", d / 3600)
     }
 
     // 스케줄 (보조 정보)

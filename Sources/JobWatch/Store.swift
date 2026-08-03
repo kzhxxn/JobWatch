@@ -14,6 +14,14 @@ final class JobStore {
     // 사용자 주석 (별명·설명·태그)
     var annotations: [String: JobAnnotation] = [:]
 
+    // runner가 기록한 정밀 실행 이력 (label → history)
+    var history: [String: JobHistory] = [:]
+
+    // 발사대에서 클릭해 선택한 잡 (하단 상세 표시용)
+    var selectedLabel: String?
+
+    func job(for label: String) -> LaunchJob? { jobs.first { $0.label == label } }
+
     init() {
         annotations = AnnotationStore.load()
     }
@@ -39,8 +47,12 @@ final class JobStore {
         let disk = await Task.detached(priority: .utility) {
             DiskInfo.current()
         }.value
+        let hist = await Task.detached(priority: .utility) {
+            RunStore.loadAll()
+        }.value
         self.jobs = scanned
         self.disk = disk
+        self.history = hist
         self.lastRefresh = Date()
         self.isRefreshing = false
     }
