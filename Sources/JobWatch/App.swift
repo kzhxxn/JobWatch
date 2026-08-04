@@ -10,12 +10,27 @@ struct JobWatchApp: App {
         MenuBarExtra {
             ContentView(store: store)
         } label: {
-            // 문제 있는 잡이 있으면 느낌표 배지 아이콘
-            Image(systemName: store.problemCount > 0
-                  ? "clock.badge.exclamationmark"
-                  : "clock.badge.checkmark")
+            Image(nsImage: JobWatchApp.barIcon(alert: store.failureCount > 0))
         }
         .menuBarExtraStyle(.window)
+    }
+
+    /// 메뉴바용 도트 로켓 — template NSImage라 다크/라이트 자동 적응. 문제 있으면 빨강.
+    static func barIcon(alert: Bool) -> NSImage {
+        let s: CGFloat = 2
+        let cols = ROCKET_PIXELS[0].count, rows = ROCKET_PIXELS.count
+        let img = NSImage(size: NSSize(width: CGFloat(cols) * s, height: CGFloat(rows) * s))
+        img.lockFocus()
+        (alert ? NSColor.systemRed : NSColor.black).setFill()
+        for (r, line) in ROCKET_PIXELS.enumerated() {
+            for (c, ch) in line.enumerated() where ch != "." {
+                let y = CGFloat(rows - 1 - r) * s          // NSImage는 좌하단 원점 → 위아래 뒤집기
+                NSBezierPath(rect: NSRect(x: CGFloat(c) * s, y: y, width: s, height: s)).fill()
+            }
+        }
+        img.unlockFocus()
+        img.isTemplate = !alert
+        return img
     }
 }
 

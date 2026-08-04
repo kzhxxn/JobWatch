@@ -72,6 +72,12 @@ enum Launchd {
             ?? []
         let runAtLoad = (dict["RunAtLoad"] as? Bool) ?? false
         let schedule = describeSchedule(dict)
+        let kind: JobKind
+        if dict["StartCalendarInterval"] != nil || dict["StartInterval"] != nil { kind = .scheduled }
+        else if dict["KeepAlive"] != nil { kind = .daemon }
+        else if dict["WatchPaths"] != nil || dict["QueueDirectories"] != nil { kind = .watch }
+        else if runAtLoad { kind = .onceAtLogin }
+        else { kind = .manual }
         let state = live[label]
         let stdout = dict["StandardOutPath"] as? String
         let stderr = dict["StandardErrorPath"] as? String
@@ -86,6 +92,7 @@ enum Launchd {
             stdoutPath: stdout,
             stderrPath: stderr,
             runAtLoad: runAtLoad,
+            kind: kind,
             isLoaded: state != nil,
             pid: state?.pid,
             lastExitCode: state?.code,
@@ -182,9 +189,12 @@ enum Launchd {
             let items = (cal as? [[String: Any]]) ?? (cal as? [String: Any]).map { [$0] } ?? []
             return items.compactMap { nextCalendarDate($0, after: now) }.min()
         }
-        // StartInterval은 로드 시각을 알 수 없어, 마지막 실행 추정치 + 간격으로만 근사.
-        if let interval = dict["StartInterval"] as? Int, let last = lastRun {
-            return last.addingTimeInterval(TimeInterval(interval))
+        // StartInterval은 로드 시각을 알 수 없어 마지막 실행 위상으로 근사.
+        // 추정 다음 실행이 과거면 다음 미래 주기로 굴림(roll-forward) → "now" 방지.
+        if let interval = dict["StartInterval"] as? Int, interval > 0, let last = lastRun {
+            let iv = TimeInterval(interval)
+            let k = max(1, ceil(now.timeIntervalSince(last) / iv))
+            return last.addingTimeInterval(k * iv)
         }
         return nil
     }

@@ -97,3 +97,21 @@
 "pad.next" = "Next";
 "pad.seeAll" = "See all";
 "pad.none" = "No scheduled launches";
+
+"section.active" = "Active";
+"section.inactive" = "Inactive";
+"detail.back" = "Jobs";
+
+"detail.history" = "Run history";
+"detail.noHistory" = "No recorded history — only jobs run through the app runner are logged.";
+
+"kind.scheduled" = "Scheduled";
+"kind.daemon" = "Always on";
+"kind.watch" = "On change";
+"kind.once" = "At login";
+"kind.manual" = "Manual";
+
+"pad.next" = "Next run";
+"section.issues" = "Issues";
+
+"detail.lastExit" = "Last exit code: %d";

@@ -52,6 +52,7 @@ struct MainPad: View {
         let groundY = size.height - 3
         let ox: CGFloat = 22
         let rH = CGFloat(ROCKET_PIXELS.count) * scale
+        let rw = CGFloat(ROCKET_PIXELS[0].count) * scale
 
         // 발사 페이즈 (0~1). launchAt이 최근이면 리프트오프.
         var phase: Double = -1
@@ -131,13 +132,33 @@ struct MainPad: View {
                          with: .color(.white.opacity(0.2)))
             }
         }
-        // 실패 연기
-        if state == .failed && phase < 0 {
-            let fy = topY + rH
-            for k in 0..<3 {
-                let sy = fy + CGFloat(k) * scale - CGFloat((Int(t * 3) + k) % 3)
-                ctx.fill(Path(CGRect(x: ox + 3 * scale, y: sy, width: scale, height: scale)),
-                         with: .color(.gray.opacity(0.45 - Double(k) * 0.12)))
+        // 실패 잡: 대기 중엔 연기, 발사하면 공중 폭발 💥
+        if state == .failed {
+            if phase < 0 {
+                let fy = topY + rH
+                for k in 0..<3 {
+                    let sy = fy + CGFloat(k) * scale - CGFloat((Int(t * 3) + k) % 3)
+                    ctx.fill(Path(CGRect(x: ox + 3 * scale, y: sy, width: scale, height: scale)),
+                             with: .color(.gray.opacity(0.45 - Double(k) * 0.12)))
+                }
+            } else if phase >= 0.45 {
+                let ep = (phase - 0.45) / 0.55            // 폭발 진행 0..1
+                let cx = ox + rw / 2
+                let cy = topY + rH / 2
+                for k in 0..<12 {                          // 사방으로 파편
+                    let ang = Double(k) / 12 * 2 * .pi
+                    let dist = CGFloat(ep) * 24
+                    let px = cx + CGFloat(cos(ang)) * dist
+                    let py = cy + CGFloat(sin(ang)) * dist
+                    let c: Color = k % 3 == 0 ? .orange : (k % 3 == 1 ? .red : .gray)
+                    ctx.fill(Path(CGRect(x: px, y: py, width: scale, height: scale)),
+                             with: .color(c.opacity(1 - ep)))
+                }
+                if ep < 0.35 {                             // 섬광
+                    let r = 6 + ep * 20
+                    ctx.fill(Path(CGRect(x: cx - r, y: cy - r, width: r * 2, height: r * 2)),
+                             with: .color(.orange.opacity(0.55 * (1 - ep / 0.35))))
+                }
             }
         }
     }
@@ -185,14 +206,16 @@ struct TransporterSprite: View {
 struct LaunchPadView: View {
     @Bindable var store: JobStore
     @State private var expanded = false
-    private let queueLimit = 5
 
     private var jobs: [LaunchJob] { store.jobs }
     private var upcoming: [LaunchJob] {
         jobs.filter { $0.nextRun != nil }.sorted { $0.nextRun! < $1.nextRun! }
     }
-    private var running: [LaunchJob] { jobs.filter { $0.pid != nil } }
-    private var mainJob: LaunchJob? { running.first ?? upcoming.first }
+    // 발사대는 예약 잡 전용 — 실행 중인 "예약" 잡(nextRun 있음) 우선, 없으면 다음 예약.
+    // 데몬(nextRun 없음)은 여기 안 옴 → 궤도(orbit)로 감.
+    private var mainJob: LaunchJob? {
+        jobs.first { $0.pid != nil && $0.nextRun != nil } ?? upcoming.first
+    }
     private var queue: [LaunchJob] { upcoming.filter { $0.label != mainJob?.label } }
 
     private func state(_ j: LaunchJob) -> PadState {
@@ -217,9 +240,36 @@ struct LaunchPadView: View {
             starrySky
             baseFloor
             content
+            orbitLayer          // 위에 얹어 위성 클릭 가능 (빈 영역은 통과)
         }
-        .frame(height: expanded ? 130 : 82)
+        .frame(height: expanded ? 130 : 92)
         .clipped()
+    }
+
+    // 상시 데몬 = 실행 중(pid)인데 예약 시각 없음 → 이미 궤도에 올라 도는 위성
+    private var orbiters: [LaunchJob] {
+        jobs.filter { $0.pid != nil && $0.nextRun == nil }
+    }
+
+    // 위성 = 태스크(데몬). 제자리에서 작게 도는 궤도 + 호버 툴팁 + 클릭 상세.
+    private var orbitLayer: some View {
+        GeometryReader { geo in
+            let sats = Array(orbiters.prefix(8).enumerated())
+            let n = max(1, sats.count)
+            TimelineView(.animation(minimumInterval: 1.0 / 12.0)) { tl in
+                let t = tl.date.timeIntervalSinceReferenceDate
+                ForEach(sats, id: \.element.id) { i, j in
+                    let anchorX = geo.size.width * (0.08 + 0.84 * (Double(i) + 0.5) / Double(n))
+                    let ph = Double(i) * 1.3
+                    SatelliteDot(daemon: name(j))
+                        .help(tip(j))
+                        .onTapGesture { select(j) }
+                        .position(x: anchorX + cos(t * 0.8 + ph) * 6,
+                                  y: 13 + sin(t * 0.8 + ph) * 4)
+                }
+            }
+        }
+        .frame(height: 30)
     }
 
     // 전체 폭 기지 바닥 + 원경 구조물 (정적, 애니메이션 불필요 → 저비용)
@@ -247,19 +297,36 @@ struct LaunchPadView: View {
                         .help(tip(main))
                         .onTapGesture { select(main) }
                     if !expanded {
-                        HStack(alignment: .bottom, spacing: 4) {
-                            ForEach(queue.prefix(queueLimit), id: \.id) { j in
-                                TransporterSprite(state: state(j))
+                        // 공간에 맞게 최대한 채우기 (잘리지 않는 개수만큼) + 카운트다운으로 상단 여백 채움
+                        GeometryReader { geo in
+                            let slot: CGFloat = 46           // 트랜스포터(scale3) 37 + 간격
+                            let n = max(1, Int(geo.size.width / slot))
+                            HStack(alignment: .bottom, spacing: 9) {
+                                ForEach(queue.prefix(n), id: \.id) { j in
+                                    VStack(spacing: 2) {
+                                        Spacer(minLength: 0)
+                                        if let nn = j.nextRun {
+                                            Text(countdown(nn))
+                                                .font(.system(size: 9, weight: .semibold))
+                                                .foregroundStyle(.cyan.opacity(0.9))
+                                        }
+                                        TransporterSprite(state: state(j), scale: 3)
+                                    }
                                     .help(tip(j))
                                     .onTapGesture { select(j) }
+                                }
+                                if queue.count > n {
+                                    Text("+\(queue.count - n)")
+                                        .font(.caption2).foregroundStyle(.white.opacity(0.7))
+                                }
+                                Spacer(minLength: 0)
                             }
-                            if queue.count > queueLimit {
-                                Text("+\(queue.count - queueLimit)")
-                                    .font(.caption2).foregroundStyle(.white.opacity(0.7))
-                            }
+                            .frame(maxHeight: .infinity, alignment: .bottom)
                         }
+                        .frame(height: 56)
+                    } else {
+                        Spacer()
                     }
-                    Spacer()
                     Button { withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() } } label: {
                         Image(systemName: expanded ? "chevron.up" : "chevron.down")
                             .font(.system(size: 10)).foregroundStyle(.white.opacity(0.6))
@@ -302,12 +369,13 @@ struct LaunchPadView: View {
         return name(main)
     }
     private func countdown(_ date: Date) -> String {
-        let s = date.timeIntervalSinceNow
+        let s = date.timeIntervalSince(store.tick)         // 공유 틱 기준 → 목록과 동기화
         if s < 0 { return "now" }
-        if s < 60 { return "\(Int(s))s" }
-        if s < 3600 { return "\(Int(s / 60))m" }
-        if s < 86400 { return "\(Int(s / 3600))h" }
-        return "\(Int(s / 86400))d"
+        if s < 86400 {                                    // 24h 이내 → 시:분:초 카운트다운
+            let n = Int(s)
+            return String(format: "%d:%02d:%02d", n / 3600, (n % 3600) / 60, n % 60)
+        }
+        return date.formatted(date: .numeric, time: .omitted)   // 넘어가면 연월일
     }
 
     private var starrySky: some View {
@@ -328,5 +396,20 @@ struct LaunchPadView: View {
                                     Color(red: 0.10, green: 0.12, blue: 0.24)],
                            startPoint: .top, endPoint: .bottom)
         )
+    }
+}
+
+/// 궤도 위성 = 상시 데몬 태스크. 작게 그린 도트(본체+태양전지판+안테나), 호버·클릭용 히트영역 확보.
+struct SatelliteDot: View {
+    let daemon: String
+    var body: some View {
+        Canvas { ctx, _ in
+            ctx.fill(Path(CGRect(x: 0, y: 6, width: 4, height: 2)), with: .color(.cyan.opacity(0.8)))
+            ctx.fill(Path(CGRect(x: 12, y: 6, width: 4, height: 2)), with: .color(.cyan.opacity(0.8)))
+            ctx.fill(Path(CGRect(x: 6, y: 4, width: 4, height: 5)), with: .color(.white.opacity(0.9)))
+            ctx.fill(Path(CGRect(x: 7, y: 1, width: 1, height: 3)), with: .color(.white.opacity(0.6)))
+        }
+        .frame(width: 16, height: 14)
+        .contentShape(Rectangle())
     }
 }

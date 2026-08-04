@@ -1,5 +1,14 @@
 import Foundation
 
+/// 잡 트리거 종류 — 섹션 분류용.
+enum JobKind: String, Sendable {
+    case scheduled    // 반복 예약 (자주 동작)
+    case daemon       // 상시 유지 (KeepAlive)
+    case onceAtLogin  // 로그인 시 1회
+    case watch        // 경로 변경 감지
+    case manual       // 수동/기타
+}
+
 /// launchd 잡이 정의된 위치 (권한 범위가 다름).
 enum JobDomain: String, Sendable {
     case userAgent      // ~/Library/LaunchAgents  — 내 권한으로 관리 가능
@@ -15,7 +24,7 @@ enum JobDomain: String, Sendable {
 
 /// 한 개의 launchd 잡 (plist + 실시간 상태를 합친 뷰 모델).
 struct LaunchJob: Identifiable, Sendable, Hashable {
-    var id: String { label }
+    var id: String { plistPath }   // 라벨은 중복될 수 있어(같은 파일이 user/global 양쪽) 경로로 식별
 
     let label: String
     let plistPath: String
@@ -27,6 +36,7 @@ struct LaunchJob: Identifiable, Sendable, Hashable {
     let stdoutPath: String?
     let stderrPath: String?
     let runAtLoad: Bool
+    let kind: JobKind
 
     // launchctl에서 가져온 실시간 상태
     var isLoaded: Bool

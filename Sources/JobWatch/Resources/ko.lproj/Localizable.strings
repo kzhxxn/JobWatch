@@ -97,3 +97,21 @@
 "pad.next" = "다음 발사";
 "pad.seeAll" = "전체 보기";
 "pad.none" = "예정된 발사 없음";
+
+"section.active" = "활성";
+"section.inactive" = "비활성";
+"detail.back" = "목록";
+
+"detail.history" = "실행 이력";
+"detail.noHistory" = "정밀 실행 이력 없음 — runner를 거친 잡만 기록됩니다.";
+
+"kind.scheduled" = "자주 동작";
+"kind.daemon" = "상시 실행";
+"kind.watch" = "변경 감지";
+"kind.once" = "로그인 1회";
+"kind.manual" = "수동";
+
+"pad.next" = "다음 실행";
+"section.issues" = "문제";
+
+"detail.lastExit" = "마지막 종료 코드: %d";

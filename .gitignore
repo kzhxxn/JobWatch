@@ -3,3 +3,6 @@
 .DS_Store
 *.xcodeproj
 .swiftpm/
+
+# generated sprite originals (art mode removed; kept locally)
+assets/

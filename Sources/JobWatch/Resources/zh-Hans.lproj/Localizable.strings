@@ -97,3 +97,21 @@
 "pad.next" = "下次发射";
 "pad.seeAll" = "查看全部";
 "pad.none" = "无预定发射";
+
+"section.active" = "活动";
+"section.inactive" = "未激活";
+"detail.back" = "列表";
+
+"detail.history" = "运行历史";
+"detail.noHistory" = "无记录历史 — 仅记录经过 runner 的任务。";
+
+"kind.scheduled" = "定时";
+"kind.daemon" = "常驻";
+"kind.watch" = "变更触发";
+"kind.once" = "登录时";
+"kind.manual" = "手动";
+
+"pad.next" = "下次运行";
+"section.issues" = "问题";
+
+"detail.lastExit" = "上次退出代码: %d";

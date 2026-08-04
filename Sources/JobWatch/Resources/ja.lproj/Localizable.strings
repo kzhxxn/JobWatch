@@ -97,3 +97,21 @@
 "pad.next" = "次の発射";
 "pad.seeAll" = "すべて表示";
 "pad.none" = "予定された発射なし";
+
+"section.active" = "有効";
+"section.inactive" = "無効";
+"detail.back" = "一覧";
+
+"detail.history" = "実行履歴";
+"detail.noHistory" = "記録された履歴なし — runner を経由したジョブのみ記録されます。";
+
+"kind.scheduled" = "定期実行";
+"kind.daemon" = "常時稼働";
+"kind.watch" = "変更検知";
+"kind.once" = "ログイン時";
+"kind.manual" = "手動";
+
+"pad.next" = "次の実行";
+"section.issues" = "問題";
+
+"detail.lastExit" = "前回の終了コード: %d";

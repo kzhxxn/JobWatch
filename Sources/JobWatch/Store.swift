@@ -20,6 +20,33 @@ final class JobStore {
     // 발사대에서 클릭해 선택한 잡 (하단 상세 표시용)
     var selectedLabel: String?
 
+    // 상단 발사대 씬 표시 여부(접기)
+    var showScene = true
+
+    // 모든 카운트다운이 공유하는 1초 틱 (목록 ↔ 발사대 동기화)
+    var tick = Date()
+    private var firedFor: [String: Date] = [:]   // 이미 발사 애니 재생한 nextRun 값
+
+    /// 1초마다 호출 — 틱 갱신 + 카운트다운 0 도달 시 발사 애니 트리거
+    func advanceTick() {
+        let now = Date()
+        tick = now
+        for j in jobs {
+            guard let nr = j.nextRun, nr <= now, firedFor[j.label] != nr else { continue }
+            firedFor[j.label] = nr
+            launchAt[j.label] = now
+        }
+        launchAt = launchAt.filter { now.timeIntervalSince($0.value) < 5 }
+    }
+
+    // 실제 실패한 잡 = 로드됐는데 마지막 종료코드 ≠ 0 (로드 안 됨은 실패 아님)
+    func isFailing(_ j: LaunchJob) -> Bool {
+        guard j.isLoaded, j.pid == nil else { return false }   // 실행 중이면 실패 아님
+        let e = history[j.label]?.last?.exitCode.map(Int.init) ?? j.lastExitCode
+        return (e ?? 0) != 0
+    }
+    var failureCount: Int { jobs.filter(isFailing).count }
+
     // 최근 발사 감지 (label → 애니메이션 시작 시각). 짧은 잡도 놓치지 않게 이력/mtime 변화로 감지.
     var launchAt: [String: Date] = [:]
     private var lastSeenStart: [String: Date] = [:]
