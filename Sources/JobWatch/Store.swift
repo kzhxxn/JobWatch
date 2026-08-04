@@ -122,8 +122,37 @@ final class JobStore {
         launchAt = launchAt.filter { now.timeIntervalSince($0.value) < 5 }   // 오래된 건 정리
     }
 
+    // 정밀 추적(adopt)한 잡의 원본 인자 백업
+    var adopted: [String: [String]] = AdoptStore.load()
+    func isAdopted(_ job: LaunchJob) -> Bool { adopted[job.label] != nil }
+
     init() {
         annotations = AnnotationStore.load()
+    }
+
+    func adopt(_ job: LaunchJob) async {
+        guard job.isManageable else { lastMessage = "시스템 잡은 정밀 추적 불가"; return }
+        guard RunnerInstall.installIfNeeded() else { lastMessage = "runner 설치 실패"; return }
+        let plist = job.plistPath, label = job.label
+        let original = job.programArguments
+        let runner = RunnerInstall.installedPath
+        let (ok, msg) = await Task.detached {
+            LaunchdEdit.adopt(plistPath: plist, label: label, runner: runner, original: original)
+        }.value
+        if ok { adopted[label] = original; AdoptStore.save(adopted) }
+        lastMessage = msg
+        await refresh()
+    }
+
+    func unadopt(_ job: LaunchJob) async {
+        guard let original = adopted[job.label] else { return }
+        let plist = job.plistPath
+        let (ok, msg) = await Task.detached {
+            LaunchdEdit.revert(plistPath: plist, original: original)
+        }.value
+        if ok { adopted[job.label] = nil; AdoptStore.save(adopted) }
+        lastMessage = msg
+        await refresh()
     }
 
     func annotation(for job: LaunchJob) -> JobAnnotation {

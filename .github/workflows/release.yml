@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Build app bundle
+        run: |
+          chmod +x build-app.sh
+          ./build-app.sh
+
+      - name: Package DMG
+        run: |
+          mkdir -p dist/dmg
+          cp -R JobWatch.app dist/dmg/
+          ln -s /Applications dist/dmg/Applications
+          hdiutil create -volname "JobWatch" -srcfolder dist/dmg \
+            -ov -format UDZO "JobWatch-${GITHUB_REF_NAME}.dmg"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: JobWatch-*.dmg
+          body: |
+            JobWatch ${{ github.ref_name }}
+
+            Ad-hoc signed (not notarized). On first open: right-click → Open,
+            or run `xattr -dr com.apple.quarantine JobWatch.app`.

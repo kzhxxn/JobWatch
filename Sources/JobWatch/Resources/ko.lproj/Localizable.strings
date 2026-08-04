@@ -122,3 +122,6 @@
 "settings.launchAtLogin" = "로그인 시 자동 시작";
 "settings.showScene" = "발사기지 표시";
 "notif.failed" = "%1$@ 실패 (exit %2$d)";
+
+"detail.preciseTracking" = "정밀 추적 (runner 경유)";
+"detail.preciseTrackingHelp" = "이 잡을 jobwatch-runner로 감싸 정확한 시작/소요/종료를 기록합니다.";

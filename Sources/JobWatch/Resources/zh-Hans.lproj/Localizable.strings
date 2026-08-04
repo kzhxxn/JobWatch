@@ -122,3 +122,6 @@
 "settings.launchAtLogin" = "登录时启动";
 "settings.showScene" = "显示发射基地";
 "notif.failed" = "%1$@ 失败 (exit %2$d)";
+
+"detail.preciseTracking" = "精确追踪 (经 runner)";
+"detail.preciseTrackingHelp" = "通过 jobwatch-runner 包装以记录精确的开始/时长/退出。";

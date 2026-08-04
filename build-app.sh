@@ -18,6 +18,8 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 cp "$BIN_DIR/$APP_NAME" "$APP/Contents/MacOS/$APP_NAME"
+# 헤드리스 러너도 번들에 포함 (앱이 실행 시 안정 경로로 설치)
+cp "$BIN_DIR/jobwatch-runner" "$APP/Contents/MacOS/jobwatch-runner"
 
 # SPM 리소스 번들(다국어 .strings)을 실행파일 옆 + Resources 양쪽에 복사 → Bundle.module 확실히 인식
 for b in "$BIN_DIR"/*.bundle; do

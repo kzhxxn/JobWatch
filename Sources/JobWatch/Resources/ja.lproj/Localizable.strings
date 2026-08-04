@@ -122,3 +122,6 @@
 "settings.launchAtLogin" = "ログイン時に起動";
 "settings.showScene" = "発射基地を表示";
 "notif.failed" = "%1$@ が失敗 (exit %2$d)";
+
+"detail.preciseTracking" = "精密トラッキング (runner経由)";
+"detail.preciseTrackingHelp" = "runnerでラップして正確な開始/所要/終了を記録します。";

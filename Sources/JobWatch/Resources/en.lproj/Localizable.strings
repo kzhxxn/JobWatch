@@ -122,3 +122,6 @@
 "settings.launchAtLogin" = "Launch at login";
 "settings.showScene" = "Show launch base";
 "notif.failed" = "%1$@ failed (exit %2$d)";
+
+"detail.preciseTracking" = "Precise tracking (via runner)";
+"detail.preciseTrackingHelp" = "Wrap this job through jobwatch-runner to record exact start/duration/exit.";

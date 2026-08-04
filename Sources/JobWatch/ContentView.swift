@@ -127,6 +127,17 @@ struct ContentView: View {
                 }.font(.caption).foregroundStyle(.secondary)
                 // 마지막 종료 상태 (실행 중이면 상태, 아니면 종료 코드)
                 lastStatusLine(job, h)
+                // 정밀 추적(runner 경유) 토글 — 사용자 잡만
+                if job.isManageable {
+                    Toggle(isOn: Binding(
+                        get: { store.isAdopted(job) },
+                        set: { on in Task { on ? await store.adopt(job) : await store.unadopt(job) } }
+                    )) {
+                        Text(t("detail.preciseTracking")).font(.caption)
+                    }
+                    .toggleStyle(.switch).controlSize(.mini)
+                    .help(t("detail.preciseTrackingHelp"))
+                }
                 runHistorySection(h)
                 Divider().padding(.vertical, 2)
                 HStack(spacing: 16) {
