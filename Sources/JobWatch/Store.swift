@@ -27,10 +27,17 @@ final class JobStore {
     var tick = Date()
     private var firedFor: [String: Date] = [:]   // 이미 발사 애니 재생한 nextRun 값
 
+    // 하단 콘솔용 시스템 지표 (1초마다 샘플)
+    var vitals = SystemVitals()
+    private let sampler = SystemSampler()
+    var runningCount: Int { jobs.filter { $0.pid != nil }.count }
+    var jobLoad: Double { jobs.isEmpty ? 0 : Double(runningCount) / Double(jobs.count) }
+
     /// 1초마다 호출 — 틱 갱신 + 카운트다운 0 도달 시 발사 애니 트리거
     func advanceTick() {
         let now = Date()
         tick = now
+        vitals = sampler.sample()
         for j in jobs {
             guard let nr = j.nextRun, nr <= now, firedFor[j.label] != nr else { continue }
             firedFor[j.label] = nr

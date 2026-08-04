@@ -115,3 +115,5 @@
 "section.issues" = "问题";
 
 "detail.lastExit" = "上次退出代码: %d";
+
+"section.system" = "系统";

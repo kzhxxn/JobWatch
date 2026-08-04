@@ -56,6 +56,8 @@ struct ContentView: View {
                 jobList                             // 간소화 그룹 목록
             }
             Divider()
+            consoleStrip                            // 하단 시스템 콘솔
+            Divider()
             footer
         }
         .frame(width: 380)
@@ -244,18 +246,64 @@ struct ContentView: View {
                 .buttonStyle(.borderless)
                 .help(t("header.refresh"))
             }
-            // 디스크 게이지
-            HStack(spacing: 8) {
-                Text(t("header.disk")).font(.caption).foregroundStyle(.secondary)
-                ProgressView(value: store.disk.usedFraction)
-                    .tint(store.disk.usedFraction > 0.85 ? .red : .accentColor)
-                Text("\(store.disk.usedBytes.humanSize) / \(store.disk.totalBytes.humanSize)")
-                    .font(.caption).monospacedDigit().foregroundStyle(.secondary)
-            }
-            Text(t("header.jobsSummary", store.jobs.count, store.healthyCount, store.problemCount))
+            // 잡 건강 바 (히어로) — 실패 비율 빨강 / 나머지 초록
+            healthBar
+            Text(t("header.jobsSummary", store.jobs.count, store.healthyCount, store.failureCount))
                 .font(.caption).foregroundStyle(.secondary)
         }
         .padding(12)
+    }
+
+    private var healthBar: some View {
+        let total = max(store.jobs.count, 1)
+        let fail = store.failureCount
+        return GeometryReader { geo in
+            HStack(spacing: 2) {
+                if fail > 0 {
+                    Capsule().fill(.red)
+                        .frame(width: max(6, geo.size.width * Double(fail) / Double(total)))
+                }
+                Capsule().fill(.green.opacity(0.65))
+            }
+        }
+        .frame(height: 6)
+    }
+
+    // 하단 미션컨트롤 콘솔 — CPU·MEM·DISK·실행중 잡수
+    private var consoleStrip: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(t("section.system")).font(.caption).bold().foregroundStyle(.secondary)
+            HStack(spacing: 14) {
+                segGauge("CPU", store.vitals.cpu).frame(maxWidth: .infinity)
+                segGauge("MEM", store.vitals.mem).frame(maxWidth: .infinity)
+                segGauge("DISK", store.vitals.diskFraction).frame(maxWidth: .infinity)
+                segGauge("JOB", store.jobLoad, countLabel: "\(store.runningCount)", tint: .blue)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+    }
+
+    private func segGauge(_ label: String, _ value: Double,
+                          countLabel: String? = nil, tint: Color? = nil) -> some View {
+        let segs = 8
+        let filled = min(segs, max(0, Int((value * Double(segs)).rounded())))
+        let color = tint ?? (value < 0.6 ? Color.green : (value < 0.85 ? Color.yellow : Color.red))
+        return VStack(spacing: 3) {
+            HStack(spacing: 2) {
+                ForEach(0..<segs, id: \.self) { i in
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(i < filled ? color : Color.secondary.opacity(0.18))
+                        .frame(height: 9)
+                        .frame(maxWidth: .infinity)      // 셀 너비를 꽉 채움
+                }
+            }
+            HStack(spacing: 3) {
+                Text(label).font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                Text(countLabel ?? "\(Int(value * 100))%")
+                    .font(.system(size: 9)).monospacedDigit().foregroundStyle(.secondary)
+            }
+        }
     }
 
     private func sectionHeader(_ title: String) -> some View {
