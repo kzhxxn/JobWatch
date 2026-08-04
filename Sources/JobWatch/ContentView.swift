@@ -130,7 +130,7 @@ struct ContentView: View {
                 // 정밀 추적(runner 경유) 토글 — 사용자 잡만
                 if job.isManageable {
                     Toggle(isOn: Binding(
-                        get: { store.isAdopted(job) },
+                        get: { job.isTracked },
                         set: { on in Task { on ? await store.adopt(job) : await store.unadopt(job) } }
                     )) {
                         Text(t("detail.preciseTracking")).font(.caption)

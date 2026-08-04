@@ -37,6 +37,7 @@ struct LaunchJob: Identifiable, Sendable, Hashable {
     let stderrPath: String?
     let runAtLoad: Bool
     let kind: JobKind
+    let isTracked: Bool   // runner로 감싸져 정밀 추적 중
 
     // launchctl에서 가져온 실시간 상태
     var isLoaded: Bool

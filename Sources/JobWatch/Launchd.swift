@@ -67,9 +67,18 @@ enum Launchd {
         else { return nil }
 
         let label = (dict["Label"] as? String) ?? (name as NSString).deletingPathExtension
-        let args = (dict["ProgramArguments"] as? [String])
+        let rawArgs = (dict["ProgramArguments"] as? [String])
             ?? (dict["Program"] as? String).map { [$0] }
             ?? []
+        // runner 래퍼면 벗겨서 "진짜 명령"으로 추론/표시 (이름·설명이 runner로 안 잡히게)
+        var args = rawArgs
+        var isTracked = false
+        if let first = rawArgs.first,
+           (first as NSString).lastPathComponent == "jobwatch-runner",
+           let sep = rawArgs.firstIndex(of: "--"), sep + 1 < rawArgs.count {
+            isTracked = true
+            args = Array(rawArgs[(sep + 1)...])
+        }
         let runAtLoad = (dict["RunAtLoad"] as? Bool) ?? false
         let schedule = describeSchedule(dict)
         let kind: JobKind
@@ -93,6 +102,7 @@ enum Launchd {
             stderrPath: stderr,
             runAtLoad: runAtLoad,
             kind: kind,
+            isTracked: isTracked,
             isLoaded: state != nil,
             pid: state?.pid,
             lastExitCode: state?.code,

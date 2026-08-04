@@ -132,6 +132,7 @@ final class JobStore {
 
     func adopt(_ job: LaunchJob) async {
         guard job.isManageable else { lastMessage = "시스템 잡은 정밀 추적 불가"; return }
+        guard !job.isTracked else { return }
         guard RunnerInstall.installIfNeeded() else { lastMessage = "runner 설치 실패"; return }
         let plist = job.plistPath, label = job.label
         let original = job.programArguments
@@ -145,7 +146,9 @@ final class JobStore {
     }
 
     func unadopt(_ job: LaunchJob) async {
-        guard let original = adopted[job.label] else { return }
+        // 백업이 있으면 그걸로, 없어도 job.programArguments는 이미 래퍼가 벗겨진 원본 명령
+        let original = adopted[job.label] ?? job.programArguments
+        guard !original.isEmpty else { return }
         let plist = job.plistPath
         let (ok, msg) = await Task.detached {
             LaunchdEdit.revert(plistPath: plist, original: original)
