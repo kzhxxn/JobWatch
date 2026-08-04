@@ -245,6 +245,15 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderless)
                 .help(t("header.refresh"))
+                // 설정
+                Menu {
+                    Toggle(t("settings.launchAtLogin"), isOn: $store.launchAtLogin)
+                    Toggle(t("settings.showScene"), isOn: $store.showScene)
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .menuStyle(.borderlessButton).fixedSize()
+                .help(t("settings.title"))
             }
             // 잡 건강 바 (히어로) — 실패 비율 빨강 / 나머지 초록
             healthBar

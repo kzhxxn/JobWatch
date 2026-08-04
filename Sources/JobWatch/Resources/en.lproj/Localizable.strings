@@ -117,3 +117,8 @@
 "detail.lastExit" = "Last exit code: %d";
 
 "section.system" = "SYSTEM";
+
+"settings.title" = "Settings";
+"settings.launchAtLogin" = "Launch at login";
+"settings.showScene" = "Show launch base";
+"notif.failed" = "%1$@ failed (exit %2$d)";

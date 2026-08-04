@@ -117,3 +117,8 @@
 "detail.lastExit" = "前回の終了コード: %d";
 
 "section.system" = "システム";
+
+"settings.title" = "設定";
+"settings.launchAtLogin" = "ログイン時に起動";
+"settings.showScene" = "発射基地を表示";
+"notif.failed" = "%1$@ が失敗 (exit %2$d)";

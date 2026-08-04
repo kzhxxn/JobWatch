@@ -1,5 +1,7 @@
 import Foundation
 import Observation
+import ServiceManagement
+import UserNotifications
 
 /// 앱 전역 상태. 스캔은 백그라운드에서, 갱신은 메인 액터에서.
 @MainActor
@@ -20,8 +22,22 @@ final class JobStore {
     // 발사대에서 클릭해 선택한 잡 (하단 상세 표시용)
     var selectedLabel: String?
 
-    // 상단 발사대 씬 표시 여부(접기)
-    var showScene = true
+    // 상단 발사대 씬 표시 여부(접기) — UserDefaults에 저장
+    var showScene: Bool = (UserDefaults.standard.object(forKey: "showScene") as? Bool) ?? true {
+        didSet { UserDefaults.standard.set(showScene, forKey: "showScene") }
+    }
+
+    // 로그인 시 자동 시작 (SMAppService)
+    var launchAtLogin: Bool = (SMAppService.mainApp.status == .enabled) {
+        didSet {
+            do {
+                if launchAtLogin { try SMAppService.mainApp.register() }
+                else { try SMAppService.mainApp.unregister() }
+            } catch {
+                lastMessage = "자동 시작 설정 실패: \(error.localizedDescription)"
+            }
+        }
+    }
 
     // 모든 카운트다운이 공유하는 1초 틱 (목록 ↔ 발사대 동기화)
     var tick = Date()
@@ -53,6 +69,36 @@ final class JobStore {
         return (e ?? 0) != 0
     }
     var failureCount: Int { jobs.filter(isFailing).count }
+
+    // 실패 알림 — 새 실패로 바뀔 때 1회만 (첫 스캔에선 알림 안 함)
+    private var notifiedExit: [String: Int] = [:]
+    private var failNotifReady = false
+
+    private func checkFailureNotifications() {
+        for j in jobs {
+            let e = history[j.label]?.last?.exitCode.map(Int.init) ?? j.lastExitCode
+            if isFailing(j), let code = e {
+                if failNotifReady && notifiedExit[j.label] != code {
+                    notifyFailure(job: j, code: code)
+                }
+                notifiedExit[j.label] = code
+            } else {
+                notifiedExit[j.label] = nil   // 정상/실행 중 → 다음 실패 때 다시 알림
+            }
+        }
+        failNotifReady = true
+    }
+
+    private func notifyFailure(job: LaunchJob, code: Int) {
+        let a = annotations[job.label]
+        let name = (a?.displayName.isEmpty == false) ? a!.displayName : Inference.displayName(for: job)
+        let content = UNMutableNotificationContent()
+        content.title = "JobWatch"
+        content.body = t("notif.failed", name, code)
+        content.sound = .default
+        let req = UNNotificationRequest(identifier: "fail-\(job.label)-\(code)", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(req)
+    }
 
     // 최근 발사 감지 (label → 애니메이션 시작 시각). 짧은 잡도 놓치지 않게 이력/mtime 변화로 감지.
     var launchAt: [String: Date] = [:]
@@ -108,6 +154,7 @@ final class JobStore {
         self.disk = disk
         self.history = hist
         detectLaunches()
+        checkFailureNotifications()
         self.lastRefresh = Date()
         self.isRefreshing = false
     }

@@ -117,3 +117,8 @@
 "detail.lastExit" = "上次退出代码: %d";
 
 "section.system" = "系统";
+
+"settings.title" = "设置";
+"settings.launchAtLogin" = "登录时启动";
+"settings.showScene" = "显示发射基地";
+"notif.failed" = "%1$@ 失败 (exit %2$d)";
