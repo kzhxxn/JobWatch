@@ -71,14 +71,7 @@ enum Launchd {
             ?? (dict["Program"] as? String).map { [$0] }
             ?? []
         // runner 래퍼면 벗겨서 "진짜 명령"으로 추론/표시 (이름·설명이 runner로 안 잡히게)
-        var args = rawArgs
-        var isTracked = false
-        if let first = rawArgs.first,
-           (first as NSString).lastPathComponent == "jobwatch-runner",
-           let sep = rawArgs.firstIndex(of: "--"), sep + 1 < rawArgs.count {
-            isTracked = true
-            args = Array(rawArgs[(sep + 1)...])
-        }
+        let (args, isTracked) = unwrapRunner(rawArgs)
         let runAtLoad = (dict["RunAtLoad"] as? Bool) ?? false
         let schedule = describeSchedule(dict)
         let kind: JobKind
@@ -200,13 +193,29 @@ enum Launchd {
             return items.compactMap { nextCalendarDate($0, after: now) }.min()
         }
         // StartInterval은 로드 시각을 알 수 없어 마지막 실행 위상으로 근사.
-        // 추정 다음 실행이 과거면 다음 미래 주기로 굴림(roll-forward) → "now" 방지.
-        if let interval = dict["StartInterval"] as? Int, interval > 0, let last = lastRun {
-            let iv = TimeInterval(interval)
-            let k = max(1, ceil(now.timeIntervalSince(last) / iv))
-            return last.addingTimeInterval(k * iv)
+        if let interval = dict["StartInterval"] as? Int, let last = lastRun {
+            return intervalRun(interval: interval, lastRun: last, now: now)
         }
         return nil
+    }
+
+    /// 주기 잡의 다음 실행 근사 — 항상 엄밀히 미래로 굴림(roll-forward, "now"/과거 방지).
+    /// floor(diff/iv)+1 이라 diff가 주기의 정수배여도 next > now 보장.
+    static func intervalRun(interval: Int, lastRun: Date, now: Date) -> Date? {
+        guard interval > 0 else { return nil }
+        let iv = TimeInterval(interval)
+        let k = max(1, floor(now.timeIntervalSince(lastRun) / iv) + 1)
+        return lastRun.addingTimeInterval(k * iv)
+    }
+
+    /// ProgramArguments가 jobwatch-runner 래퍼면 "진짜 명령"만 벗겨 반환 (tracked=true).
+    static func unwrapRunner(_ rawArgs: [String]) -> (args: [String], tracked: Bool) {
+        if let first = rawArgs.first,
+           (first as NSString).lastPathComponent == "jobwatch-runner",
+           let sep = rawArgs.firstIndex(of: "--"), sep + 1 < rawArgs.count {
+            return (Array(rawArgs[(sep + 1)...]), true)
+        }
+        return (rawArgs, false)
     }
 
     private static func nextCalendarDate(_ c: [String: Any], after date: Date) -> Date? {
