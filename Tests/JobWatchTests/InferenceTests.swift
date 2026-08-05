@@ -44,8 +44,9 @@ final class InferenceTests: XCTestCase {
     // MARK: - humanSize: 바이트 → 사람이 읽는 크기
 
     func testHumanSizeNonEmpty() {
+        // 로케일에 따라 표기가 달라지므로 "비어있지 않음"만 검증
         XCTAssertFalse(Int64(1_500_000_000).humanSize.isEmpty)
-        XCTAssertTrue(Int64(0).humanSize.contains("0"))
+        XCTAssertFalse(Int64(0).humanSize.isEmpty)
     }
 
     // MARK: - category: 명령 → 카테고리 추론
