@@ -184,12 +184,28 @@ struct ContentView: View {
                         .font(.caption)
                 }
 
+                // 위험 명령 경고 (등록 전 인지) — 차단 아님, 사용자 판단
+                let warns = CommandSafety.warnings(for: draftCommand)
+                if !warns.isEmpty {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label(t("danger.title"), systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption).foregroundStyle(.orange)
+                        ForEach(warns) { w in
+                            Text("• \(t(w.reason))").font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+                }
+
                 HStack {
                     Spacer()
                     Button(t("create.cancel")) { creating = false }
-                    Button(t("create.create")) { submitCreate() }
+                    Button(warns.isEmpty ? t("create.create") : t("create.createAnyway")) { submitCreate() }
                         .keyboardShortcut(.defaultAction)
                         .disabled(draftName.isEmpty || draftCommand.isEmpty)
+                        .tint(warns.isEmpty ? nil : .orange)
                 }
             }
             .padding(12)

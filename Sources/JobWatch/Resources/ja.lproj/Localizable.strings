@@ -156,3 +156,16 @@
 
 "scene.toggle" = "発射台 / 軌道表示";
 "scene.hide" = "シーン表示/非表示";
+
+"danger.title" = "危険な可能性のあるコマンド";
+"create.createAnyway" = "それでも作成";
+"danger.sudo" = "sudo(管理者)で実行";
+"danger.rmrf" = "再帰的な強制削除 (rm -rf)";
+"danger.disk" = "ディスク/フォーマット操作";
+"danger.remoteFetch" = "インターネットからダウンロード";
+"danger.forkbomb" = "フォークボム";
+"danger.bypass" = "権限チェックの回避";
+"danger.reverseShell" = "リバースシェル";
+"danger.keychain" = "キーチェーン/機密へのアクセス";
+"danger.systemWrite" = "システムパスへの書き込み";
+"danger.pipeToShell" = "ダウンロードしてシェルにパイプ";

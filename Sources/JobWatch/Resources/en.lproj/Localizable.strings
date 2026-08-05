@@ -156,3 +156,16 @@
 
 "scene.toggle" = "Launch pad / Orbit view";
 "scene.hide" = "Show/hide scene";
+
+"danger.title" = "Potentially risky command";
+"create.createAnyway" = "Create anyway";
+"danger.sudo" = "Runs as sudo (admin)";
+"danger.rmrf" = "Recursive force-delete (rm -rf)";
+"danger.disk" = "Disk/format operation";
+"danger.remoteFetch" = "Downloads from the internet";
+"danger.forkbomb" = "Fork-bomb pattern";
+"danger.bypass" = "Bypasses permission checks";
+"danger.reverseShell" = "Reverse-shell pattern";
+"danger.keychain" = "Accesses Keychain/secrets";
+"danger.systemWrite" = "Writes to system paths";
+"danger.pipeToShell" = "Downloads and pipes to a shell";

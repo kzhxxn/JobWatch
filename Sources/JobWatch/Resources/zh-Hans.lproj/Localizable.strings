@@ -156,3 +156,16 @@
 
 "scene.toggle" = "发射台 / 轨道视图";
 "scene.hide" = "显示/隐藏场景";
+
+"danger.title" = "可能有风险的命令";
+"create.createAnyway" = "仍然创建";
+"danger.sudo" = "以 sudo（管理员）运行";
+"danger.rmrf" = "递归强制删除 (rm -rf)";
+"danger.disk" = "磁盘/格式化操作";
+"danger.remoteFetch" = "从互联网下载";
+"danger.forkbomb" = "fork 炸弹";
+"danger.bypass" = "绕过权限检查";
+"danger.reverseShell" = "反向 shell";
+"danger.keychain" = "访问钥匙串/机密";
+"danger.systemWrite" = "写入系统路径";
+"danger.pipeToShell" = "下载并通过管道传给 shell";

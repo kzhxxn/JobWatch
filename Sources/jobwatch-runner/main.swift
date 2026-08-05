@@ -125,15 +125,22 @@ func record(jobID: String, dbPath: String, startedAt: Double, endedAt: Double,
     sqlite3_finalize(stmt)
 
     // 보존정책: 잡당 최근 KEEP_RUNS개만 + KEEP_DAYS 이내만 (제2의 turbo 캐시 방지)
+    // 모두 파라미터 바인딩 — 문자열 조립 SQL 금지 (인젝션 방어)
     let cutoff = Date().timeIntervalSince1970 - KEEP_DAYS * 86400
-    sqlite3_exec(db, "DELETE FROM runs WHERE started_at < \(cutoff);", nil, nil, nil)
-    sqlite3_exec(db, """
-        DELETE FROM runs WHERE job_id = '\(jobID.replacingOccurrences(of: "'", with: "''"))'
-          AND id NOT IN (
-            SELECT id FROM runs WHERE job_id = '\(jobID.replacingOccurrences(of: "'", with: "''"))'
-            ORDER BY started_at DESC LIMIT \(KEEP_RUNS)
-          );
-        """, nil, nil, nil)
+    if sqlite3_prepare_v2(db, "DELETE FROM runs WHERE started_at < ?;", -1, &stmt, nil) == SQLITE_OK {
+        sqlite3_bind_double(stmt, 1, cutoff); sqlite3_step(stmt)
+    }
+    sqlite3_finalize(stmt)
+    let capSQL = """
+        DELETE FROM runs WHERE job_id = ?1 AND id NOT IN (
+          SELECT id FROM runs WHERE job_id = ?1 ORDER BY started_at DESC LIMIT ?2);
+        """
+    if sqlite3_prepare_v2(db, capSQL, -1, &stmt, nil) == SQLITE_OK {
+        sqlite3_bind_text(stmt, 1, jobID, -1, SQLITE_TRANSIENT)
+        sqlite3_bind_int(stmt, 2, Int32(KEEP_RUNS))
+        sqlite3_step(stmt)
+    }
+    sqlite3_finalize(stmt)
 }
 record(jobID: jobID, dbPath: dbPath, startedAt: startedAt, endedAt: endedAt,
        exitCode: exitCode, stdoutTail: outTail.text, stderrTail: errTail.text)
