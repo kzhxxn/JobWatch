@@ -26,6 +26,13 @@ let command = Array(argv[(sep + 1)...])
 // MARK: - DB 경로
 
 let dbPath: String = {
+    // 테스트·격리용: JOBWATCH_DB 환경변수로 DB 경로 오버라이드 가능
+    if let override = ProcessInfo.processInfo.environment["JOBWATCH_DB"], !override.isEmpty {
+        try? FileManager.default.createDirectory(
+            atPath: (override as NSString).deletingLastPathComponent,
+            withIntermediateDirectories: true)
+        return override
+    }
     let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("JobWatch", isDirectory: true)
     try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)

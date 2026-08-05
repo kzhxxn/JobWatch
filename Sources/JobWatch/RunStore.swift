@@ -31,7 +31,8 @@ enum RunStore {
             .appendingPathComponent("JobWatch/jobwatch.sqlite").path
     }
 
-    static func loadAll(limitPerJob: Int = 20) -> [String: JobHistory] {
+    static func loadAll(limitPerJob: Int = 20, path: String? = nil) -> [String: JobHistory] {
+        let dbPath = path ?? self.dbPath
         guard FileManager.default.fileExists(atPath: dbPath) else { return [:] }
         var db: OpaquePointer?
         guard sqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else { return [:] }
