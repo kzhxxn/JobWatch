@@ -1,5 +1,7 @@
 # 🚀 JobWatch
 
+**English** · [한국어](README.ko.md)
+
 A local-first **launchd job observability** menu bar app for macOS — see what your
 scheduled jobs and background agents *actually did*, as a little pixel launch complex.
 
@@ -11,14 +13,17 @@ No cloud, no account, no telemetry. Zero dependencies (system SQLite only).
 
 - **Scans** `~/Library/LaunchAgents` + `/Library/LaunchAgents` and merges live
   `launchctl` state (loaded / PID / last exit code).
-- **Launch base scene** (pixel art): scheduled jobs queue up and launch on their
-  countdown; running daemons orbit as satellites; failed jobs explode.
+- **Launch base scene** (pixel art): scheduled jobs wait on the pad and launch on
+  their countdown; on launch a dot ascends into the top **orbit**; daemons orbit as
+  satellites; failures scatter mid-flight.
 - **Grouped list** by trigger kind (scheduled / always-on / on-change / at-login /
   manual) with a top **Issues** section for real failures.
 - **Detail** per job: description (from the script's own header comment when present),
-  schedule, last exit code, and **recorded run history** (start / duration / exit).
+  schedule, last exit code, and **recorded run history** (start / duration / exit +
+  captured output).
 - **Mission-control console**: CPU · MEM · DISK · running-JOB gauges.
-- **Failure notifications**, **launch-at-login**, **4 languages** (en / ko / ja / zh).
+- **Failure notifications**, **launch-at-login**, natural-language **AI job creation**
+  (claude/codex), **4 languages** (en / ko / ja / zh).
 
 Recorded history is precise for jobs run through the bundled `jobwatch-runner`;
 other jobs show an *estimated* last-run (from log mtime).
