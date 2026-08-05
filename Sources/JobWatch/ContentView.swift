@@ -2,6 +2,20 @@ import SwiftUI
 
 struct ContentView: View {
     @Bindable var store: JobStore
+    // 잡 생성 폼 상태
+    @State private var creating = false
+    @State private var draftName = ""
+    @State private var draftCommand = ""
+    @State private var schedType = 0        // 0 주기 / 1 매일 / 2 매주
+    @State private var intervalMin = 10
+    @State private var timeOfDay = Date()
+    @State private var weekday = 1
+    @State private var expandedRun: Int64?   // 상세 이력에서 펼친 실행의 출력
+    // AI 잡 생성
+    @State private var aiPrompt = ""
+    @State private var aiBusy = false
+    @State private var aiProviderName: String?
+    @State private var jobPendingDelete: LaunchJob?
 
     var userJobs: [LaunchJob] { store.jobs.filter { $0.domain == .userAgent } }
     var globalJobs: [LaunchJob] { store.jobs.filter { $0.domain == .globalAgent } }
@@ -49,7 +63,9 @@ struct ContentView: View {
             }
             header
             Divider()
-            if let label = store.selectedLabel, let job = store.job(for: label) {
+            if creating {
+                createForm                          // 새 잡 생성 폼
+            } else if let label = store.selectedLabel, let job = store.job(for: label) {
                 detailView(job)                     // 드릴인 상세
             } else {
                 if let msg = store.lastMessage { messageBanner(msg) }
@@ -60,7 +76,7 @@ struct ContentView: View {
             Divider()
             footer
         }
-        .frame(width: 380)
+        .frame(width: 440)
         .task {
             while !Task.isCancelled {
                 await store.refresh()
@@ -73,6 +89,10 @@ struct ContentView: View {
                 store.advanceTick()
                 try? await Task.sleep(for: .seconds(1))
             }
+        }
+        .task {
+            // AI provider(claude/codex) 조기 감지 — 생성 게이트용
+            aiProviderName = await Task.detached { AIProvider.available() }.value
         }
     }
 
@@ -89,7 +109,7 @@ struct ContentView: View {
             }
             .padding(.vertical, 6)
         }
-        .frame(maxHeight: 420)
+        .frame(minHeight: 480, maxHeight: 640)
     }
 
     private func groupHeader(_ title: String, _ count: Int, _ color: Color) -> some View {
@@ -102,6 +122,128 @@ struct ContentView: View {
         .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 2)
     }
 
+    // 새 잡 생성 폼 (runner 경유로 생성 → 처음부터 정밀 추적)
+    private var createForm: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                Button { creating = false } label: {
+                    Label(t("detail.back"), systemImage: "chevron.left").font(.caption)
+                }.buttonStyle(.borderless)
+
+                Text(t("create.title")).font(.headline)
+
+                // AI로 만들기 — claude/codex 감지 시
+                if let provider = aiProviderName {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(t("create.aiWith", provider), systemImage: "sparkles")
+                            .font(.caption).foregroundStyle(.tint)
+                        HStack(spacing: 6) {
+                            TextField(t("create.aiPh"), text: $aiPrompt).textFieldStyle(.roundedBorder)
+                            Button(action: generateWithAI) {
+                                if aiBusy { ProgressView().controlSize(.small) }
+                                else { Text(t("create.generate")) }
+                            }
+                            .disabled(aiPrompt.isEmpty || aiBusy)
+                        }
+                        Text(t("create.aiHint")).font(.caption2).foregroundStyle(.tertiary)
+                    }
+                    Divider()
+                } else {
+                    Text(t("create.noProvider")).font(.caption2).foregroundStyle(.tertiary)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(t("create.name")).font(.caption).foregroundStyle(.secondary)
+                    TextField(t("create.namePh"), text: $draftName).textFieldStyle(.roundedBorder)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(t("create.command")).font(.caption).foregroundStyle(.secondary)
+                    TextField(t("create.commandPh"), text: $draftCommand).textFieldStyle(.roundedBorder)
+                }
+
+                Picker("", selection: $schedType) {
+                    Text(t("create.interval")).tag(0)
+                    Text(t("create.daily")).tag(1)
+                    Text(t("create.weekly")).tag(2)
+                }.pickerStyle(.segmented).labelsHidden()
+
+                if schedType == 0 {
+                    HStack(spacing: 6) {
+                        Text(t("create.every"))
+                        TextField("", value: $intervalMin, format: .number)
+                            .frame(width: 46).textFieldStyle(.roundedBorder)
+                        Text(t("create.minutes"))
+                    }.font(.caption)
+                } else {
+                    if schedType == 2 {
+                        Picker(t("create.weekday"), selection: $weekday) {
+                            ForEach(0..<7, id: \.self) { i in Text(t("weekday.\(i)")).tag(i) }
+                        }.font(.caption)
+                    }
+                    DatePicker(t("create.at"), selection: $timeOfDay, displayedComponents: .hourAndMinute)
+                        .font(.caption)
+                }
+
+                HStack {
+                    Spacer()
+                    Button(t("create.cancel")) { creating = false }
+                    Button(t("create.create")) { submitCreate() }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(draftName.isEmpty || draftCommand.isEmpty)
+                }
+            }
+            .padding(12)
+        }
+        .frame(minHeight: 480, maxHeight: 640)
+        .task { aiProviderName = await Task.detached { AIProvider.available() }.value }
+    }
+
+    private func generateWithAI() {
+        let req = aiPrompt
+        aiBusy = true
+        Task {
+            let result = await Task.detached { AIProvider.generate(request: req) }.value
+            aiBusy = false
+            switch result {
+            case .ok(let d):
+                draftName = d.name
+                draftCommand = d.command
+                switch d.schedule {
+                case .interval(let m):
+                    schedType = 0; intervalMin = m
+                case .daily(let h, let mi):
+                    schedType = 1; timeOfDay = timeFrom(h, mi)
+                case .weekly(let wd, let h, let mi):
+                    schedType = 2; weekday = wd; timeOfDay = timeFrom(h, mi)
+                }
+            case .fail(let msg):
+                store.lastMessage = msg
+            }
+        }
+    }
+
+    private func timeFrom(_ h: Int, _ m: Int) -> Date {
+        Calendar.current.date(bySettingHour: h, minute: m, second: 0, of: Date()) ?? Date()
+    }
+
+    private func submitCreate() {
+        let cal = Calendar.current
+        let h = cal.component(.hour, from: timeOfDay)
+        let m = cal.component(.minute, from: timeOfDay)
+        let sched: JobSchedule
+        switch schedType {
+        case 1: sched = .daily(hour: h, minute: m)
+        case 2: sched = .weekly(weekday: weekday, hour: h, minute: m)
+        default: sched = .interval(minutes: max(1, intervalMin))
+        }
+        let name = draftName, command = draftCommand
+        Task {
+            await store.createJob(name: name, command: command, schedule: sched)
+            creating = false
+            draftName = ""; draftCommand = ""
+        }
+    }
+
     // 드릴인 상세 (목록 자리 위로 슬라이드, ← 뒤로)
     private func detailView(_ job: LaunchJob) -> some View {
         let ann = store.annotation(for: job)
@@ -110,10 +252,29 @@ struct ContentView: View {
         let h = store.history[job.label]
         return ScrollView {
             VStack(alignment: .leading, spacing: 8) {
-                Button { store.selectedLabel = nil } label: {
-                    Label(t("detail.back"), systemImage: "chevron.left").font(.caption)
+                HStack {
+                    Button { store.selectedLabel = nil } label: {
+                        Label(t("detail.back"), systemImage: "chevron.left").font(.caption)
+                    }
+                    .buttonStyle(.borderless)
+                    Spacer()
+                    if job.isManageable {
+                        if jobPendingDelete?.id == job.id {
+                            // 팝오버 안 인라인 확인 (alert는 메뉴바 팝오버를 닫아버림)
+                            Text(t("detail.deleteConfirm")).font(.caption).foregroundStyle(.red)
+                            Button(t("detail.delete"), role: .destructive) {
+                                jobPendingDelete = nil
+                                Task { await store.deleteJob(job) }
+                            }.font(.caption)
+                            Button(t("create.cancel")) { jobPendingDelete = nil }.font(.caption)
+                        } else {
+                            Button(role: .destructive) { jobPendingDelete = job } label: {
+                                Image(systemName: "trash").font(.caption)
+                            }
+                            .buttonStyle(.borderless).help(t("detail.delete"))
+                        }
+                    }
                 }
-                .buttonStyle(.borderless)
 
                 HStack(spacing: 6) {
                     Image(systemName: Inference.category(for: job).icon).foregroundStyle(.tint)
@@ -153,7 +314,7 @@ struct ContentView: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxHeight: 440)
+        .frame(minHeight: 480, maxHeight: 640)
     }
 
     // 마지막 종료 상태 — 실행 중 / 정상 종료 / 실패(exit N)
@@ -174,25 +335,25 @@ struct ContentView: View {
     private func runHistorySection(_ h: JobHistory?) -> some View {
         if let h, !h.runs.isEmpty {
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 4) {
-                    ForEach(Array(h.runs.prefix(14).reversed())) { run in
-                        Circle().fill(run.success ? Color.green : Color.red).frame(width: 7, height: 7)
-                    }
-                    Text(t("job.successRateHelp", Int((h.successRate * 100).rounded()), h.count))
-                        .font(.caption2).foregroundStyle(.secondary)
-                }
-                Text(t("detail.history")).font(.caption).bold().foregroundStyle(.secondary).padding(.top, 2)
+                Text(t("detail.history")).font(.caption).bold().foregroundStyle(.secondary)
                 ForEach(h.runs.prefix(10)) { run in
-                    HStack(spacing: 6) {
-                        Image(systemName: run.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .font(.caption2).foregroundStyle(run.success ? .green : .red)
-                        Text(run.startedAt.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption2).monospacedDigit()
-                        Spacer()
-                        if let e = run.exitCode, e != 0 {
-                            Text("exit \(e)").font(.caption2).foregroundStyle(.red)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Image(systemName: run.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .font(.caption2).foregroundStyle(run.success ? .green : .red)
+                            Text(run.startedAt.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption2).monospacedDigit()
+                            Spacer()
+                            if let e = run.exitCode, e != 0 {
+                                Text("exit \(e)").font(.caption2).foregroundStyle(.red)
+                            }
+                            Text(fmtDur(run.duration)).font(.caption2).foregroundStyle(.secondary).monospacedDigit()
+                            Image(systemName: expandedRun == run.id ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 8)).foregroundStyle(.tertiary)
                         }
-                        Text(fmtDur(run.duration)).font(.caption2).foregroundStyle(.secondary).monospacedDigit()
+                        .contentShape(Rectangle())
+                        .onTapGesture { expandedRun = (expandedRun == run.id) ? nil : run.id }
+                        if expandedRun == run.id { runOutput(run) }
                     }
                 }
             }
@@ -200,6 +361,33 @@ struct ContentView: View {
             Text(t("detail.noHistory")).font(.caption2).foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    // 한 실행의 상세 — 시작/종료/소요/exit + 캡처된 출력(stdout/stderr)
+    private func runOutput(_ run: JobRun) -> some View {
+        let out = (run.stdoutTail ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let err = (run.stderrTail ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = [out, err].filter { !$0.isEmpty }.joined(separator: "\n— stderr —\n")
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 10) {
+                Label(run.startedAt.formatted(date: .omitted, time: .standard), systemImage: "play.fill")
+                if let e = run.endedAt {
+                    Label(e.formatted(date: .omitted, time: .standard), systemImage: "stop.fill")
+                }
+                Label(fmtDur(run.duration), systemImage: "timer")
+                if let e = run.exitCode {
+                    Text("exit \(e)").foregroundStyle(e == 0 ? .green : .red)
+                }
+            }
+            .font(.system(size: 9)).foregroundStyle(.secondary)
+            // 이중 스크롤 방지 — 바깥 상세 스크롤이 처리 (출력은 8KB 꼬리라 유한)
+            Text(text.isEmpty ? t("detail.noOutput") : text)
+                .font(.system(size: 9, design: .monospaced))
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(6)
+        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 4))
     }
 
     private func fmtDur(_ d: Double?) -> String {
@@ -244,6 +432,14 @@ struct ContentView: View {
                 Image(systemName: "clock.badge.checkmark")
                 Text(t("menu.title")).font(.headline)
                 Spacer()
+                // 새 잡 생성 — AI provider 없으면 설정 안내 팝업
+                Button {
+                    if aiProviderName != nil { creating = true }
+                    else { store.lastMessage = t("setup.message") }
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .buttonStyle(.borderless).help(t("create.title"))
                 // 발사대 씬 접기/펼치기
                 Button { store.showScene.toggle() } label: {
                     Image(systemName: store.showScene ? "eye" : "eye.slash")

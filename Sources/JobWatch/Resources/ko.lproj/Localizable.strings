@@ -125,3 +125,31 @@
 
 "detail.preciseTracking" = "정밀 추적 (runner 경유)";
 "detail.preciseTrackingHelp" = "이 잡을 jobwatch-runner로 감싸 정확한 시작/소요/종료를 기록합니다.";
+"create.title" = "새 잡";
+"create.name" = "이름";
+"create.namePh" = "예: DB 백업";
+"create.command" = "명령";
+"create.commandPh" = "예: /bin/bash ~/scripts/backup.sh";
+"create.interval" = "주기";
+"create.daily" = "매일";
+"create.weekly" = "매주";
+"create.every" = "매";
+"create.minutes" = "분";
+"create.weekday" = "요일";
+"create.at" = "시각";
+"create.cancel" = "취소";
+"create.create" = "생성";
+
+"detail.noOutput" = "(캡처된 출력 없음)";
+
+"create.aiWith" = "AI로 만들기 · %@";
+"create.aiPh" = "무슨 작업인지 자연어로 적으세요";
+"create.generate" = "생성";
+"create.aiHint" = "AI가 아래 폼을 채웁니다. 확인 후 만들기.";
+"create.noProvider" = "claude 또는 codex CLI가 있으면 자연어로 잡을 만들 수 있어요.";
+
+"setup.title" = "AI 설정 필요";
+"setup.message" = "잡을 만들려면 Claude Code 또는 Codex CLI가 필요합니다. 설치·로그인 후 다시 시도하세요.\n\n예: npm i -g @anthropic-ai/claude-code  (이후: claude 로그인)";
+
+"detail.delete" = "삭제";
+"detail.deleteConfirm" = "이 잡을 삭제할까요?";

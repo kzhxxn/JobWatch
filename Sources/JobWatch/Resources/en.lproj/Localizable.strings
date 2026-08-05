@@ -125,3 +125,31 @@
 
 "detail.preciseTracking" = "Precise tracking (via runner)";
 "detail.preciseTrackingHelp" = "Wrap this job through jobwatch-runner to record exact start/duration/exit.";
+"create.title" = "New job";
+"create.name" = "Name";
+"create.namePh" = "e.g. Backup DB";
+"create.command" = "Command";
+"create.commandPh" = "e.g. /bin/bash ~/scripts/backup.sh";
+"create.interval" = "Interval";
+"create.daily" = "Daily";
+"create.weekly" = "Weekly";
+"create.every" = "Every";
+"create.minutes" = "min";
+"create.weekday" = "Weekday";
+"create.at" = "At";
+"create.cancel" = "Cancel";
+"create.create" = "Create";
+
+"detail.noOutput" = "(no output captured)";
+
+"create.aiWith" = "Create with AI · %@";
+"create.aiPh" = "Describe the job in plain language";
+"create.generate" = "Generate";
+"create.aiHint" = "AI fills the form below. Review, then create.";
+"create.noProvider" = "Install claude or codex CLI to create jobs from natural language.";
+
+"setup.title" = "AI setup required";
+"setup.message" = "Creating jobs needs Claude Code or Codex CLI. Install and sign in, then try again.\n\ne.g. npm i -g @anthropic-ai/claude-code  (then: claude)";
+
+"detail.delete" = "Delete";
+"detail.deleteConfirm" = "Delete this job?";

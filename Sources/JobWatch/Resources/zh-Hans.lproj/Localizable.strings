@@ -125,3 +125,31 @@
 
 "detail.preciseTracking" = "精确追踪 (经 runner)";
 "detail.preciseTrackingHelp" = "通过 jobwatch-runner 包装以记录精确的开始/时长/退出。";
+"create.title" = "新建任务";
+"create.name" = "名称";
+"create.namePh" = "例如：数据库备份";
+"create.command" = "命令";
+"create.commandPh" = "例如：/bin/bash ~/scripts/backup.sh";
+"create.interval" = "间隔";
+"create.daily" = "每天";
+"create.weekly" = "每周";
+"create.every" = "每";
+"create.minutes" = "分钟";
+"create.weekday" = "星期";
+"create.at" = "时间";
+"create.cancel" = "取消";
+"create.create" = "创建";
+
+"detail.noOutput" = "(无捕获输出)";
+
+"create.aiWith" = "用 AI 创建 · %@";
+"create.aiPh" = "用自然语言描述任务";
+"create.generate" = "生成";
+"create.aiHint" = "AI 会填写下方表单，确认后创建。";
+"create.noProvider" = "安装 claude 或 codex CLI 即可用自然语言创建任务。";
+
+"setup.title" = "需要设置 AI";
+"setup.message" = "创建任务需要 Claude Code 或 Codex CLI。请安装并登录后重试。";
+
+"detail.delete" = "删除";
+"detail.deleteConfirm" = "删除此任务？";

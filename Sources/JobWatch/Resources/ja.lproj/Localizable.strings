@@ -125,3 +125,31 @@
 
 "detail.preciseTracking" = "精密トラッキング (runner経由)";
 "detail.preciseTrackingHelp" = "runnerでラップして正確な開始/所要/終了を記録します。";
+"create.title" = "新規ジョブ";
+"create.name" = "名前";
+"create.namePh" = "例: DBバックアップ";
+"create.command" = "コマンド";
+"create.commandPh" = "例: /bin/bash ~/scripts/backup.sh";
+"create.interval" = "間隔";
+"create.daily" = "毎日";
+"create.weekly" = "毎週";
+"create.every" = "毎";
+"create.minutes" = "分";
+"create.weekday" = "曜日";
+"create.at" = "時刻";
+"create.cancel" = "キャンセル";
+"create.create" = "作成";
+
+"detail.noOutput" = "(出力なし)";
+
+"create.aiWith" = "AIで作成 · %@";
+"create.aiPh" = "作業内容を自然言語で入力";
+"create.generate" = "生成";
+"create.aiHint" = "AIが下のフォームを埋めます。確認して作成。";
+"create.noProvider" = "claude または codex CLI があれば自然言語でジョブを作れます。";
+
+"setup.title" = "AIのセットアップが必要";
+"setup.message" = "ジョブ作成には Claude Code または Codex CLI が必要です。インストールしてログイン後、再試行してください。";
+
+"detail.delete" = "削除";
+"detail.deleteConfirm" = "このジョブを削除しますか？";

@@ -8,7 +8,10 @@ struct JobRun: Sendable, Identifiable, Hashable {
     let endedAt: Date?
     let exitCode: Int32?
     let duration: Double?
+    let stdoutTail: String?
+    let stderrTail: String?
     var success: Bool { (exitCode ?? -1) == 0 }
+    var hasOutput: Bool { !(stdoutTail ?? "").isEmpty || !(stderrTail ?? "").isEmpty }
 }
 
 struct JobHistory: Sendable {
@@ -36,7 +39,7 @@ enum RunStore {
 
         var byJob: [String: [JobRun]] = [:]
         var stmt: OpaquePointer?
-        let sql = "SELECT id, job_id, started_at, ended_at, exit_code, duration FROM runs ORDER BY started_at DESC;"
+        let sql = "SELECT id, job_id, started_at, ended_at, exit_code, duration, stdout_tail, stderr_tail FROM runs ORDER BY started_at DESC;"
         if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
             while sqlite3_step(stmt) == SQLITE_ROW {
                 guard let cJob = sqlite3_column_text(stmt, 1) else { continue }
@@ -50,7 +53,9 @@ enum RunStore {
                     exitCode: sqlite3_column_type(stmt, 4) == SQLITE_NULL ? nil
                         : sqlite3_column_int(stmt, 4),
                     duration: sqlite3_column_type(stmt, 5) == SQLITE_NULL ? nil
-                        : sqlite3_column_double(stmt, 5)
+                        : sqlite3_column_double(stmt, 5),
+                    stdoutTail: sqlite3_column_text(stmt, 6).map { String(cString: $0) },
+                    stderrTail: sqlite3_column_text(stmt, 7).map { String(cString: $0) }
                 )
                 byJob[jobID, default: []].append(run)
             }

@@ -130,6 +130,35 @@ final class JobStore {
         annotations = AnnotationStore.load()
     }
 
+    func createJob(name: String, command: String, schedule: JobSchedule) async {
+        guard RunnerInstall.installIfNeeded() else { lastMessage = "runner 설치 실패"; return }
+        let runner = RunnerInstall.installedPath
+        let (label, msg) = await Task.detached {
+            JobCreator.create(name: name, command: command, schedule: schedule, runner: runner)
+        }.value
+        if let label { setAnnotation(JobAnnotation(displayName: name), for: label) }
+        lastMessage = msg
+        await refresh()
+    }
+
+    func deleteJob(_ job: LaunchJob) async {
+        guard job.isManageable else { lastMessage = "시스템 잡은 삭제 불가"; return }
+        let plist = job.plistPath, label = job.label
+        let (ok, msg) = await Task.detached { () -> (Bool, String) in
+            let uid = getuid()
+            Launchd.run("/bin/launchctl", ["bootout", "gui/\(uid)", plist])
+            do { try FileManager.default.removeItem(atPath: plist); return (true, "삭제됨: \(label)") }
+            catch { return (false, "삭제 실패: \(error.localizedDescription)") }
+        }.value
+        if ok {
+            annotations[label] = nil; AnnotationStore.save(annotations)
+            adopted[label] = nil; AdoptStore.save(adopted)
+            if selectedLabel == label { selectedLabel = nil }
+        }
+        lastMessage = msg
+        await refresh()
+    }
+
     func adopt(_ job: LaunchJob) async {
         guard job.isManageable else { lastMessage = "시스템 잡은 정밀 추적 불가"; return }
         guard !job.isTracked else { return }
