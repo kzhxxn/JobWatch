@@ -61,11 +61,12 @@ enum Inference {
         let cmd = job.programArguments.joined(separator: " ").lowercased()
         func has(_ needles: String...) -> Bool { needles.contains { cmd.contains($0) } }
 
+        // AI를 먼저 — claude가 /opt/homebrew/bin/claude 처럼 "homebrew" 경로에 있어 오분류되지 않게
+        if has("claude", "codex", "ollama", "llm") { return Category(name: "AI", icon: "sparkles") }
         if has("rsync", "tmutil", "restic", "borg", "backup") { return Category(name: "Backup", icon: "externaldrive.fill") }
-        if has("brew") { return Category(name: "Homebrew", icon: "cup.and.saucer.fill") }
+        if has("brew ", "/brew") { return Category(name: "Homebrew", icon: "cup.and.saucer.fill") }  // homebrew 경로 오탐 방지
         if has("docker", "colima", "podman") { return Category(name: "Docker", icon: "shippingbox.fill") }
         if has("git ", "/git") { return Category(name: "Git", icon: "arrow.triangle.branch") }
-        if has("claude", "codex", "ollama", "llm") { return Category(name: "AI", icon: "sparkles") }
         if has("node", ".js", ".mjs", ".ts", "pnpm", "npm", "yarn") { return Category(name: "Node.js", icon: "hexagon.fill") }
         if has("python", ".py", "pip") { return Category(name: "Python", icon: "chevron.left.forwardslash.chevron.right") }
         if has("ruby", ".rb") { return Category(name: "Ruby", icon: "diamond.fill") }

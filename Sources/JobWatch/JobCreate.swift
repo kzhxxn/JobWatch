@@ -12,19 +12,31 @@ enum JobCreator {
     static func slugify(_ s: String) -> String {
         var out = ""
         for ch in s.lowercased() {
-            if ch.isLetter || ch.isNumber { out.append(ch) }
-            else if ch == " " || ch == "-" || ch == "_" { out.append("-") }
+            // ASCII 영숫자만 허용 (라벨/파일명 안전) — 한글 등 비ASCII는 구분자로 처리
+            if ch.isASCII && (ch.isLetter || ch.isNumber) { out.append(ch) }
+            else { out.append("-") }
         }
         while out.contains("--") { out = out.replacingOccurrences(of: "--", with: "-") }
         return out.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
     }
 
+    /// 실행마다 안정적인(재현 가능) 짧은 해시 — 비ASCII 이름의 폴백 슬러그용.
+    static func stableHash(_ s: String) -> String {
+        var h: UInt64 = 5381
+        for b in s.utf8 { h = (h &* 33) &+ UInt64(b) }
+        return String(h % 0xFFFFFF, radix: 36)
+    }
+
     static func create(name: String, command: String, schedule: JobSchedule,
                        runner: String) -> (label: String?, message: String) {
-        let slug = slugify(name)
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let cmd = command.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !slug.isEmpty else { return (nil, "이름을 입력하세요") }
+        guard !trimmedName.isEmpty else { return (nil, "이름을 입력하세요") }
         guard !cmd.isEmpty else { return (nil, "명령을 입력하세요") }
+
+        // 비ASCII 이름(한글 등)이면 슬러그가 비므로 안정적 폴백 사용
+        var slug = slugify(trimmedName)
+        if slug.isEmpty { slug = "job-" + stableHash(trimmedName) }
 
         let label = "com.jobwatch.user.\(slug)"
         let agents = (NSHomeDirectory() as NSString).appendingPathComponent("Library/LaunchAgents")

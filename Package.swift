@@ -17,6 +17,11 @@ let package = Package(
         .executableTarget(
             name: "jobwatch-runner",
             path: "Sources/jobwatch-runner"
+        ),
+        .testTarget(
+            name: "JobWatchTests",
+            dependencies: ["JobWatch"],
+            path: "Tests/JobWatchTests"
         )
     ]
 )
