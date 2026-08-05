@@ -49,6 +49,13 @@ final class JobStore {
     var runningCount: Int { jobs.filter { $0.pid != nil }.count }
     var jobLoad: Double { jobs.isEmpty ? 0 : Double(runningCount) / Double(jobs.count) }
 
+    // 메뉴바 아이콘 애니메이션 조건: 실행 중이거나 최근 3초 내 발사 감지
+    var isActive: Bool {
+        if runningCount > 0 { return true }
+        let now = Date()
+        return launchAt.values.contains { now.timeIntervalSince($0) < 3 }
+    }
+
     /// 1초마다 호출 — 틱 갱신 + 카운트다운 0 도달 시 발사 애니 트리거
     func advanceTick() {
         let now = Date()
