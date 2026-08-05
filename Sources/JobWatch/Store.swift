@@ -81,7 +81,7 @@ final class JobStore {
         let e = history[j.label]?.last?.exitCode.map(Int.init) ?? j.lastExitCode
         return (e ?? 0) != 0
     }
-    var failureCount: Int { jobs.filter(isFailing).count }
+    var failureCount: Int { jobs.filter { isFailing($0) }.count }
 
     // 실패 알림 — 새 실패로 바뀔 때 1회만 (첫 스캔에선 알림 안 함)
     private var notifiedExit: [String: Int] = [:]

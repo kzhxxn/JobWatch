@@ -34,7 +34,7 @@ struct ContentView: View {
         }
         func group(_ k: JobKind, sortByNext: Bool = false) -> [LaunchJob] {
             let g = loaded.filter { $0.kind == k }
-            return sortByNext ? g.sorted(by: byNext) : g.sorted { $0.label < $1.label }
+            return sortByNext ? g.sorted { byNext($0, $1) } : g.sorted { $0.label < $1.label }
         }
         var out: [JobSection] = []
         if !failing.isEmpty { out.append(.init(id: t("section.issues"), color: .red, jobs: failing)) }
