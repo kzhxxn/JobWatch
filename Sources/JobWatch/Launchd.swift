@@ -74,12 +74,7 @@ enum Launchd {
         let (args, isTracked) = unwrapRunner(rawArgs)
         let runAtLoad = (dict["RunAtLoad"] as? Bool) ?? false
         let schedule = describeSchedule(dict)
-        let kind: JobKind
-        if dict["StartCalendarInterval"] != nil || dict["StartInterval"] != nil { kind = .scheduled }
-        else if dict["KeepAlive"] != nil { kind = .daemon }
-        else if dict["WatchPaths"] != nil || dict["QueueDirectories"] != nil { kind = .watch }
-        else if runAtLoad { kind = .onceAtLogin }
-        else { kind = .manual }
+        let kind = classifyKind(dict, runAtLoad: runAtLoad)
         let state = live[label]
         let stdout = dict["StandardOutPath"] as? String
         let stderr = dict["StandardErrorPath"] as? String
@@ -218,7 +213,16 @@ enum Launchd {
         return (rawArgs, false)
     }
 
-    private static func nextCalendarDate(_ c: [String: Any], after date: Date) -> Date? {
+    /// plist 딕셔너리 → 잡 종류 분류 (testable, malformed 입력에도 안전).
+    static func classifyKind(_ dict: [String: Any], runAtLoad: Bool) -> JobKind {
+        if dict["StartCalendarInterval"] != nil || dict["StartInterval"] != nil { return .scheduled }
+        if dict["KeepAlive"] != nil { return .daemon }
+        if dict["WatchPaths"] != nil || dict["QueueDirectories"] != nil { return .watch }
+        if runAtLoad { return .onceAtLogin }
+        return .manual
+    }
+
+    static func nextCalendarDate(_ c: [String: Any], after date: Date) -> Date? {
         var comps = DateComponents()
         if let m = c["Minute"] as? Int { comps.minute = m }
         if let h = c["Hour"] as? Int { comps.hour = h }
