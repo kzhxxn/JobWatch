@@ -22,9 +22,15 @@ final class JobStore {
     // 발사대에서 클릭해 선택한 잡 (하단 상세 표시용)
     var selectedLabel: String?
 
-    // 상단 발사대 씬 표시 여부(접기) — UserDefaults에 저장
+    // 상단 씬 표시 여부(접기) — UserDefaults에 저장
     var showScene: Bool = (UserDefaults.standard.object(forKey: "showScene") as? Bool) ?? true {
         didSet { UserDefaults.standard.set(showScene, forKey: "showScene") }
+    }
+    // 씬 스타일: 발사대(픽셀) ↔ 궤도(기하학) — 비교 토글
+    enum SceneStyle: String { case launchpad, orbit }
+    var sceneStyle: SceneStyle =
+        SceneStyle(rawValue: UserDefaults.standard.string(forKey: "sceneStyle") ?? "") ?? .launchpad {
+        didSet { UserDefaults.standard.set(sceneStyle.rawValue, forKey: "sceneStyle") }
     }
 
     // 로그인 시 자동 시작 (SMAppService)
@@ -133,8 +139,19 @@ final class JobStore {
     var adopted: [String: [String]] = AdoptStore.load()
     func isAdopted(_ job: LaunchJob) -> Bool { adopted[job.label] != nil }
 
+    // 메뉴바 아이콘 애니메이션 위상 (활동 중일 때만 증가 → 라벨 재렌더)
+    var iconPhase = 0
+
     init() {
         annotations = AnnotationStore.load()
+        // 팝오버가 닫혀 있어도 메뉴바 아이콘이 움직이도록 앱 수명 동안 도는 루프
+        Task { [weak self] in
+            while true {
+                try? await Task.sleep(for: .milliseconds(140))
+                guard let self else { break }
+                if self.isActive { self.iconPhase &+= 1 }
+            }
+        }
     }
 
     func createJob(name: String, command: String, schedule: JobSchedule) async {

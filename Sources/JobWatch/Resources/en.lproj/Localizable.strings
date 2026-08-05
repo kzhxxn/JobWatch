@@ -153,3 +153,6 @@
 
 "detail.delete" = "Delete";
 "detail.deleteConfirm" = "Delete this job?";
+
+"scene.toggle" = "Launch pad / Orbit view";
+"scene.hide" = "Show/hide scene";

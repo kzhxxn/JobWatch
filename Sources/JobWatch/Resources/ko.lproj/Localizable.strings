@@ -153,3 +153,6 @@
 
 "detail.delete" = "삭제";
 "detail.deleteConfirm" = "이 잡을 삭제할까요?";
+
+"scene.toggle" = "발사대 / 궤도 보기";
+"scene.hide" = "씬 표시/숨김";

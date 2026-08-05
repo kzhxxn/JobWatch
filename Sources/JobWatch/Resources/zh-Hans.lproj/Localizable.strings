@@ -153,3 +153,6 @@
 
 "detail.delete" = "删除";
 "detail.deleteConfirm" = "删除此任务？";
+
+"scene.toggle" = "发射台 / 轨道视图";
+"scene.hide" = "显示/隐藏场景";

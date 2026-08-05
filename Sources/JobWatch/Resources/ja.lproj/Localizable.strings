@@ -153,3 +153,6 @@
 
 "detail.delete" = "削除";
 "detail.deleteConfirm" = "このジョブを削除しますか？";
+
+"scene.toggle" = "発射台 / 軌道表示";
+"scene.hide" = "シーン表示/非表示";
