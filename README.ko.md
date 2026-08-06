@@ -2,6 +2,11 @@
 
 [English](README.md) · **한국어**
 
+[![CI](https://github.com/kzhxxn/JobWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/kzhxxn/JobWatch/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/kzhxxn/JobWatch)](https://github.com/kzhxxn/JobWatch/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black?logo=apple)
+
 macOS 메뉴바에서 돌아가는 로컬 우선 **launchd 잡 관측(observability)** 앱 —
 예약 잡과 백그라운드 에이전트가 *실제로 무엇을 했는지*를 작은 픽셀 발사 기지로 보여줍니다.
 

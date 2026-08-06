@@ -2,8 +2,17 @@
 
 **English** · [한국어](README.ko.md)
 
+[![CI](https://github.com/kzhxxn/JobWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/kzhxxn/JobWatch/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/kzhxxn/JobWatch)](https://github.com/kzhxxn/JobWatch/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black?logo=apple)
+
 A local-first **launchd job observability** menu bar app for macOS — see what your
 scheduled jobs and background agents *actually did*, as a little pixel launch complex.
+
+<!-- TODO: add a menu-bar screenshot or GIF here (launch pad + job list). -->
+> **Screenshot coming soon** — open the menu bar to see the launch-pad scene, grouped
+> job list, and drill-in run history.
 
 No cloud, no account, no telemetry. Zero dependencies (system SQLite only).
 
