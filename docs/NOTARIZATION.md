@@ -1,7 +1,8 @@
 # Notarization (optional)
 
 By default, release DMGs are **ad-hoc signed** — they work, but macOS Gatekeeper warns
-on first open (right-click → Open, or `xattr -dr com.apple.quarantine`).
+on first open. On macOS 15+ the user must go to System Settings → Privacy & Security →
+"Open Anyway" (right-click → Open and `xattr` on /Applications no longer work).
 
 To ship a **notarized** DMG that opens with a plain double-click, add the secrets below.
 Requires an **Apple Developer Program** membership ($99/yr). The release workflow
