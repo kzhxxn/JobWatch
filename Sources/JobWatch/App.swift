@@ -52,6 +52,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         RunnerInstall.installIfNeeded()      // 러너를 안정 경로로 설치
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        // 알림 권한 요청 — 완료 핸들러가 백그라운드 스레드로 오는데 MainActor 격리로 추론되면
+        // Swift 6 동시성 런타임이 SIGTRAP(신규 유저 첫 실행 크래시). 비격리 async로 안전하게.
+        Task.detached {
+            _ = try? await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound])
+        }
     }
 }
