@@ -66,5 +66,8 @@ img.unlockFocus()
 let tiff = img.tiffRepresentation!
 let rep = NSBitmapImageRep(data: tiff)!
 let png = rep.representation(using: .png, properties: [:])!
-try! png.write(to: URL(fileURLWithPath: "/Users/mark/DevGit/side/JobWatch/assets/appicon-geo.png"))
-print("saved appicon-geo.png")
+// 스크립트 위치 기준 상대 경로 (개인 경로 하드코딩 제거)
+let outDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("assets")
+try? FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
+try! png.write(to: outDir.appendingPathComponent("appicon-geo.png"))
+print("saved assets/appicon-geo.png")
