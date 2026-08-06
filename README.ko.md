@@ -36,20 +36,30 @@ macOS 메뉴바에서 돌아가는 로컬 우선 **launchd 잡 관측(observabil
 brew install --cask kzhxxn/tap/jobwatch
 ```
 
-Homebrew가 체크섬을 검증합니다. 아직 공증(notarize) 전이라 Gatekeeper가 적용되므로,
-**첫 실행 시** `/Applications`에서 앱을 **우클릭 → 열기**(한 번) 하거나, 격리를 건너뛰고 설치하세요:
+Homebrew가 체크섬을 검증합니다. **이 빌드는 아직 공증(notarize) 전**이라 Gatekeeper가 첫 실행을 막습니다.
 
-```bash
-brew install --cask --no-quarantine kzhxxn/tap/jobwatch
-```
+- **macOS 15 (Sequoia) 이상:** 예전의 우클릭 → 열기 우회가 더 이상 안 됩니다.
+  **시스템 설정 → 개인정보 보호 및 보안** → 아래로 스크롤 → JobWatch의 **"확인 없이 열기"** 클릭.
+  또는 터미널에서:
+  ```bash
+  xattr -dr com.apple.quarantine /Applications/JobWatch.app
+  ```
+- **macOS 14:** `/Applications`에서 앱을 **우클릭 → 열기**(한 번).
 
-그다음 메뉴바에서 궤도 아이콘을 찾으세요.
+그다음 메뉴바에서 궤도 아이콘을 찾으세요. (공증하면 이 단계가 아예 사라집니다 —
+[docs/NOTARIZATION.md](docs/NOTARIZATION.md) 참고.)
 
 ### DMG 다운로드
 
 [Releases](https://github.com/kzhxxn/JobWatch/releases)에서 최신 `.dmg`를 받으세요.
-릴리스 빌드는 ad-hoc 서명(공증 안 됨)이라 첫 실행 시 **우클릭 → 열기**(한 번) 하거나
-`xattr -dr com.apple.quarantine JobWatch.app` 를 실행하면 됩니다.
+ad-hoc 서명(공증 안 됨)이라 첫 실행을 Gatekeeper가 막습니다 — 위와 동일하게
+(macOS 15+: 시스템 설정 → 개인정보 보호 및 보안 → **확인 없이 열기**, 또는
+`xattr -dr com.apple.quarantine JobWatch.app`).
+
+받은 파일이 이 저장소 CI에서 나왔는지 검증:
+```bash
+gh attestation verify JobWatch-vX.Y.Z.dmg --repo kzhxxn/JobWatch
+```
 
 ## 요구사항
 

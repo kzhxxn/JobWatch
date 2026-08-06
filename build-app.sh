@@ -7,6 +7,8 @@ cd "$(dirname "$0")"
 APP_NAME="JobWatch"
 BUNDLE_ID="com.mark.jobwatch"
 APP="${APP_NAME}.app"
+# 버전: 릴리스는 태그(JOBWATCH_VERSION=0.1.3)를 주입, 로컬 빌드는 dev
+VERSION="${JOBWATCH_VERSION:-0.0.0-dev}"
 
 echo "▶︎ swift build (release)…"
 swift build -c release
@@ -40,8 +42,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleDisplayName</key>        <string>${APP_NAME}</string>
     <key>CFBundleExecutable</key>         <string>${APP_NAME}</string>
     <key>CFBundleIdentifier</key>         <string>${BUNDLE_ID}</string>
-    <key>CFBundleVersion</key>            <string>1.0</string>
-    <key>CFBundleShortVersionString</key> <string>1.0</string>
+    <key>CFBundleVersion</key>            <string>${VERSION}</string>
+    <key>CFBundleShortVersionString</key> <string>${VERSION}</string>
     <key>CFBundlePackageType</key>        <string>APPL</string>
     <key>CFBundleIconFile</key>           <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>     <string>14.0</string>

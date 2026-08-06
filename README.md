@@ -39,21 +39,31 @@ other jobs show an *estimated* last-run (from log mtime).
 brew install --cask kzhxxn/tap/jobwatch
 ```
 
-Homebrew verifies the download checksum. Because this build isn't notarized yet,
-Gatekeeper still applies, so on **first launch** either right-click the app in
-`/Applications` → **Open** once, or install skipping quarantine:
+Homebrew verifies the download checksum. **This build is not notarized yet**, so
+Gatekeeper blocks it on first launch.
 
-```bash
-brew install --cask --no-quarantine kzhxxn/tap/jobwatch
-```
+- **macOS 15 (Sequoia) and later:** the old right-click → Open trick no longer works.
+  Open **System Settings → Privacy & Security**, scroll down, and click
+  **"Open Anyway"** for JobWatch. Or, in Terminal:
+  ```bash
+  xattr -dr com.apple.quarantine /Applications/JobWatch.app
+  ```
+- **macOS 14:** right-click the app in `/Applications` → **Open** once.
 
-Then look for the orbit icon in the menu bar.
+Then look for the orbit icon in the menu bar. (A notarized build removes this step
+entirely — see [docs/NOTARIZATION.md](docs/NOTARIZATION.md).)
 
 ### Download the DMG
 
 Grab the latest `.dmg` from [Releases](https://github.com/kzhxxn/JobWatch/releases).
-Because release builds are ad-hoc signed (not notarized), on first open either
-**right-click → Open** once, or run `xattr -dr com.apple.quarantine JobWatch.app`.
+Builds are ad-hoc signed (not notarized), so Gatekeeper blocks the first launch — see
+the same steps as above (macOS 15+: System Settings → Privacy & Security → **Open
+Anyway**, or `xattr -dr com.apple.quarantine JobWatch.app`).
+
+You can verify the download came from this repo's CI:
+```bash
+gh attestation verify JobWatch-vX.Y.Z.dmg --repo kzhxxn/JobWatch
+```
 
 ## Requirements
 
