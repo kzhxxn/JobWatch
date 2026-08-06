@@ -28,10 +28,27 @@ macOS 메뉴바에서 돌아가는 로컬 우선 **launchd 잡 관측(observabil
 
 > App Store 배포는 불가합니다(샌드박스가 `launchctl` 접근을 막음). 직접 배포·오픈소스용 앱입니다.
 
+## 설치
+
+### Homebrew (권장)
+
+```bash
+brew install --cask kzhxxn/tap/jobwatch
+```
+
+Homebrew가 체크섬을 검증하고 격리 속성을 제거하므로 Gatekeeper 경고 없이 바로 열립니다.
+메뉴바에서 궤도 아이콘을 찾으세요.
+
+### DMG 다운로드
+
+[Releases](https://github.com/kzhxxn/JobWatch/releases)에서 최신 `.dmg`를 받으세요.
+릴리스 빌드는 ad-hoc 서명(공증 안 됨)이라 첫 실행 시 **우클릭 → 열기**(한 번) 하거나
+`xattr -dr com.apple.quarantine JobWatch.app` 를 실행하면 됩니다.
+
 ## 요구사항
 
 - macOS 14 (Sonoma) 이상
-- 빌드하려면: Xcode 또는 Swift 6 툴체인 (`swift --version`)
+- 소스에서 빌드하려면: Xcode 또는 Swift 6 툴체인 (`swift --version`)
 
 ## 빌드 & 실행
 
@@ -41,15 +58,7 @@ open ./JobWatch.app  # 메뉴바에 아이콘이 나타남
 ```
 
 **로그인 시 자동 시작**을 켜기 전에 `JobWatch.app`을 `/Applications`로 옮기세요.
-
-## 설치 (다운로드한 빌드)
-
-릴리스 빌드는 ad-hoc 서명(공증 안 됨)이라 macOS Gatekeeper가 첫 실행 시 경고합니다. 둘 중 하나:
-
-- 앱을 **우클릭 → 열기** (한 번), 또는
-- `xattr -dr com.apple.quarantine JobWatch.app`
-
-(공증 DMG는 Apple 개발자 계정이 필요합니다. 기여 환영.)
+공증 DMG는 Apple 개발자 계정이 필요합니다 — [docs/NOTARIZATION.md](docs/NOTARIZATION.md) 참고.
 
 ## 의존성
 

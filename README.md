@@ -31,10 +31,27 @@ other jobs show an *estimated* last-run (from log mtime).
 > App Store distribution isn't possible (the sandbox blocks `launchctl`), so this is
 > a direct-distribution / open-source app.
 
+## Install
+
+### Homebrew (recommended)
+
+```bash
+brew install --cask kzhxxn/tap/jobwatch
+```
+
+Homebrew verifies the download checksum and clears the quarantine flag, so it opens
+without a Gatekeeper prompt. Look for the orbit icon in the menu bar.
+
+### Download the DMG
+
+Grab the latest `.dmg` from [Releases](https://github.com/kzhxxn/JobWatch/releases).
+Because release builds are ad-hoc signed (not notarized), on first open either
+**right-click → Open** once, or run `xattr -dr com.apple.quarantine JobWatch.app`.
+
 ## Requirements
 
 - macOS 14 (Sonoma) or later
-- To build: Xcode or a Swift 6 toolchain (`swift --version`)
+- To build from source: Xcode or a Swift 6 toolchain (`swift --version`)
 
 ## Build & run
 
@@ -44,16 +61,7 @@ open ./JobWatch.app  # a rocket icon appears in the menu bar
 ```
 
 Move `JobWatch.app` to `/Applications` before enabling **launch at login**.
-
-## Install (downloaded build)
-
-Because release builds are ad-hoc signed (not notarized), macOS Gatekeeper will warn
-on first open. Either:
-
-- **Right-click → Open** once, or
-- `xattr -dr com.apple.quarantine JobWatch.app`
-
-(A notarized DMG needs an Apple Developer account; contributions welcome.)
+A notarized DMG needs an Apple Developer account — see [docs/NOTARIZATION.md](docs/NOTARIZATION.md).
 
 ## Dependencies
 
