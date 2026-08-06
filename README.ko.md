@@ -36,8 +36,14 @@ macOS 메뉴바에서 돌아가는 로컬 우선 **launchd 잡 관측(observabil
 brew install --cask kzhxxn/tap/jobwatch
 ```
 
-Homebrew가 체크섬을 검증하고 격리 속성을 제거하므로 Gatekeeper 경고 없이 바로 열립니다.
-메뉴바에서 궤도 아이콘을 찾으세요.
+Homebrew가 체크섬을 검증합니다. 아직 공증(notarize) 전이라 Gatekeeper가 적용되므로,
+**첫 실행 시** `/Applications`에서 앱을 **우클릭 → 열기**(한 번) 하거나, 격리를 건너뛰고 설치하세요:
+
+```bash
+brew install --cask --no-quarantine kzhxxn/tap/jobwatch
+```
+
+그다음 메뉴바에서 궤도 아이콘을 찾으세요.
 
 ### DMG 다운로드
 

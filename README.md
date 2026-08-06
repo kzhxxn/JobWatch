@@ -39,8 +39,15 @@ other jobs show an *estimated* last-run (from log mtime).
 brew install --cask kzhxxn/tap/jobwatch
 ```
 
-Homebrew verifies the download checksum and clears the quarantine flag, so it opens
-without a Gatekeeper prompt. Look for the orbit icon in the menu bar.
+Homebrew verifies the download checksum. Because this build isn't notarized yet,
+Gatekeeper still applies, so on **first launch** either right-click the app in
+`/Applications` → **Open** once, or install skipping quarantine:
+
+```bash
+brew install --cask --no-quarantine kzhxxn/tap/jobwatch
+```
+
+Then look for the orbit icon in the menu bar.
 
 ### Download the DMG
 
