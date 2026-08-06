@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write        # 빌드 provenance 어테스테이션(OIDC)
+  attestations: write
 
 jobs:
   build:
@@ -15,7 +17,7 @@ jobs:
       # secret 존재 여부를 if 조건에서 쓰기 위해 job-level env로 노출
       MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Select latest Xcode (Swift 6)
         run: sudo xcode-select -s /Applications/Xcode_16.app
@@ -80,8 +82,13 @@ jobs:
             --issuer "$AC_API_ISSUER_ID" --wait
           xcrun stapler staple "JobWatch-${GITHUB_REF_NAME}.dmg"
 
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: "JobWatch-*.dmg"
+
       - name: Publish release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           files: JobWatch-*.dmg
           body: |
